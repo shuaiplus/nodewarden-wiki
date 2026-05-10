@@ -11,7 +11,7 @@ export default defineConfig({
     ['meta', { property: 'og:description', content: 'NodeWarden 部署、备份、安全与架构文档。' }]
   ],
   themeConfig: {
-    logo: '/nodewarden.svg',
+    logo: '/nodewarden-logo.svg',
     nav: [
       { text: '快速开始', link: '/guide/quick-start' },
       { text: '备份中心', link: '/guide/backup/overview' },

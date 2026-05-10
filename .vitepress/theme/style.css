@@ -33,11 +33,16 @@
 }
 
 .VPHomeHero .image-bg {
-  opacity: 0.24;
+  opacity: 0.16;
+}
+
+.VPHomeHero .image-src {
+  max-width: 300px;
+  max-height: 250px;
 }
 
 .nw-home {
-  max-width: 1120px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 0 24px 64px;
 }
@@ -92,7 +97,8 @@
 
 .nw-metrics {
   display: grid;
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .nw-metric {
@@ -178,6 +184,7 @@
 
 @media (max-width: 900px) {
   .nw-snapshot,
+  .nw-metrics,
   .nw-grid,
   .nw-steps {
     grid-template-columns: 1fr;
