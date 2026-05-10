@@ -1,0 +1,8 @@
+node_modules
+.npm-cache
+.vitepress/cache
+.vitepress/.temp
+.vitepress/dist
+dist
+*.log
+*.err
