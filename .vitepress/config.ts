@@ -17,7 +17,6 @@ export default defineConfig({
       { text: '备份中心', link: '/guide/backup/overview' },
       { text: '架构设计', link: '/guide/architecture/overview' },
       { text: 'Demo', link: 'https://nodewarden-demo.pages.dev/' },
-      { text: 'GitHub', link: 'https://github.com/shuaiplus/NodeWarden' }
     ],
     sidebar: {
       '/guide/': [
@@ -26,7 +25,7 @@ export default defineConfig({
         items: [
           { text: '项目定位', link: '/guide/overview' },
           { text: '快速开始', link: '/guide/quick-start' },
-          { text: 'Cloudflare 部署', link: '/guide/deployment/cloudflare' },
+          { text: '完整参数', link: '/guide/deployment/cloudflare' },
           { text: '配置与密钥', link: '/guide/deployment/configuration' },
           { text: '更新与维护', link: '/guide/deployment/update' },
           { text: '客户端连接', link: '/guide/core/clients' }

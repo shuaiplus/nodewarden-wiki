@@ -1,4 +1,4 @@
-# Cloudflare 部署
+# 完整参数
 
 NodeWarden 的默认部署目标是 Cloudflare Workers。仓库会把前端构建到 `dist/`，Worker 同时处理 API 和静态资源。
 

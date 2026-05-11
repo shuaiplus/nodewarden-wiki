@@ -19,6 +19,7 @@
   background:
     radial-gradient(circle at 20% 12%, rgba(37, 99, 235, 0.12), transparent 30%),
     linear-gradient(180deg, rgba(240, 246, 255, 0.72), transparent 420px);
+  margin-bottom: 100px;
 }
 
 .dark .VPHome {
@@ -27,9 +28,29 @@
     linear-gradient(180deg, rgba(15, 23, 42, 0.72), transparent 420px);
 }
 
+@media (min-width: 768px) {
+  .VPHome.VPHome {
+    margin-bottom: 100px;
+  }
+}
+
 .VPHomeHero .name,
 .VPHomeHero .text {
   letter-spacing: 0;
+}
+
+.VPHomeHero .name {
+  font-size: 56px;
+  line-height: 1.05;
+  font-weight: 800;
+}
+
+.VPHomeHero .text {
+  max-width: 620px;
+  margin-top: 10px;
+  font-size: 40px;
+  line-height: 1.18;
+  font-weight: 760;
 }
 
 .VPHomeHero .image-bg {
@@ -39,6 +60,20 @@
 .VPHomeHero .image-src {
   max-width: 300px;
   max-height: 250px;
+}
+
+@media (max-width: 767px) {
+  .VPHomeHero .name {
+    font-size: 40px;
+    line-height: 1.08;
+  }
+
+  .VPHomeHero .text {
+    max-width: 360px;
+    margin-top: 8px;
+    font-size: 28px;
+    line-height: 1.22;
+  }
 }
 
 .nw-home {
