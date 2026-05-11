@@ -10,14 +10,11 @@ hero:
     alt: NodeWarden
   actions:
     - theme: brand
-      text: 在线 Demo
-      link: https://nodewarden-demo.pages.dev/
-    - theme: alt
       text: 快速开始
       link: /guide/quick-start
     - theme: alt
-      text: 备份设计
-      link: /guide/backup/overview
+      text: 在线 Demo
+      link: https://nodewarden-demo.pages.dev/
 
 features:
   - title: 部署足够简单

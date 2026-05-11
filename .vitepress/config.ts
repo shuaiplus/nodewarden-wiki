@@ -25,7 +25,7 @@ export default defineConfig({
         items: [
           { text: '项目定位', link: '/guide/overview' },
           { text: '快速开始', link: '/guide/quick-start' },
-          { text: '完整参数', link: '/guide/deployment/cloudflare' },
+          { text: 'Cloudflare 参数', link: '/guide/deployment/cloudflare' },
           { text: '配置与密钥', link: '/guide/deployment/configuration' },
           { text: '更新与维护', link: '/guide/deployment/update' },
           { text: '客户端连接', link: '/guide/core/clients' }
@@ -76,7 +76,7 @@ export default defineConfig({
         text: '运维排错',
         items: [
           { text: '常见问题', link: '/guide/operations/faq' },
-          { text: '限制与已知边界', link: '/guide/operations/limitations' },
+          { text: '限制与边界', link: '/guide/operations/limitations' },
           { text: '排错清单', link: '/guide/operations/troubleshooting' },
           { text: '备份事故处理', link: '/guide/operations/backup-incidents' }
         ]

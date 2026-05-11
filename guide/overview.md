@@ -1,16 +1,16 @@
 # 项目定位
 
-NodeWarden 是一个运行在 Cloudflare Workers 上的 Bitwarden 兼容服务端。它不是 Bitwarden 官方服务端的完整克隆，也不是只给官方客户端提供最小 API 的薄壳，而是把密码库服务端、原创 Web Vault、附件、Send、导入导出、云端备份中心和管理能力放到一个轻量部署模型里。
+NodeWarden 是运行在 Cloudflare Workers 上的 Bitwarden 兼容服务端。它不是 Bitwarden 官方服务端的完整克隆，而是把个人密码库、原创 Web Vault、附件、Send、导入导出、备份中心和管理能力放进一个轻量部署模型。
 
 你可以把它理解成三个层次：
 
 - **服务端兼容层**：提供 `/identity/*`、`/api/sync`、`/api/ciphers/*`、附件、Send、预登录、令牌刷新等官方客户端需要的接口。
 - **网页密码库**：仓库内 `webapp/` 是原创前端，不依赖官方 Web Vault，支持密码库管理、导入导出、备份中心、管理员页面等功能。
-- **Cloudflare 运行层**：Worker 处理 API 与静态资源，D1 保存结构化数据，R2 或 KV 保存附件与 Send 文件，Durable Object 用于实时通知。
+- **Cloudflare 运行层**：Worker 处理 API 与静态资源，D1 保存结构化数据，R2/KV 保存附件与 Send 文件，Durable Object 用于实时通知。
 
 ## 适合谁
 
-NodeWarden 适合想要自托管密码库、希望部署成本低、愿意使用 Cloudflare Workers 生态的人。它尤其适合个人、小团队、家庭实例，以及想把密码库服务放在边缘网络里的人。
+NodeWarden 适合想要自托管密码库、希望部署成本低、愿意使用 Cloudflare Workers 生态的人。它尤其适合个人、小团队和家庭实例。
 
 它不适合需要企业组织、集合权限、SSO、SCIM、企业目录同步、官方商业支持的场景。NodeWarden 当前没有实现 Bitwarden 的组织/集合权限模型，所以不要把它当作企业版 Bitwarden 替代品。
 
@@ -41,17 +41,17 @@ NodeWarden 的代码里有几个长期原则：
 - **备份白名单**：实例级备份只导出明确列入白名单的表和字段，不把运行锁、临时令牌、审计日志等运行态数据带走。
 - **失败可解释**：备份还原、附件恢复、JWT_SECRET 缺失、KV 大文件限制等场景都会尽量给出明确错误。
 
-## 代码入口
+## 阅读路径
 
-理解项目可以从这些文件开始：
+如果只是部署，先看：
 
-- `src/index.ts`：Worker 入口、静态资源分流、数据库初始化、定时任务入口。
-- `src/router.ts`：公开路由、JWT_SECRET 安全检查、鉴权、限流和认证路由分发。
-- `src/services/storage.ts`：D1 存储服务、schema 版本门禁、修订时间、令牌清理。
-- `src/handlers/sync.ts`：官方客户端全量同步。
-- `src/handlers/ciphers.ts`：密码项兼容层和未知字段保留策略。
-- `src/handlers/backup.ts`：备份中心 API、定时任务、远程备份执行。
-- `src/services/backup-archive.ts`：实例备份 ZIP 格式和内容校验。
-- `src/services/backup-import.ts`：还原流程、shadow 表校验、附件恢复。
-- `src/services/backup-settings-crypto.ts`：备份目标配置的 runtime/portable 加密信封。
+- [快速开始](/guide/quick-start)
+- [配置与密钥](/guide/deployment/configuration)
+- [常见问题](/guide/operations/faq)
 
+如果要改代码，先看：
+
+- [整体架构](/guide/architecture/overview)
+- [后端路由与服务层](/guide/architecture/backend-routing-services)
+- [前端架构](/guide/architecture/frontend)
+- [开发与代码约定](/guide/architecture/development)

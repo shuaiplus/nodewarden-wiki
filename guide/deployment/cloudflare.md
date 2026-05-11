@@ -1,4 +1,4 @@
-# 完整参数
+# Cloudflare 参数
 
 NodeWarden 的默认部署目标是 Cloudflare Workers。仓库会把前端构建到 `dist/`，Worker 同时处理 API 和静态资源。
 
@@ -103,4 +103,3 @@ npm run deploy:demo
 ```
 
 这个脚本会先执行 `npm run build:demo`，再把 `dist` 部署到 Pages 项目。正式实例不要用 Demo 模式保存真实数据。
-
