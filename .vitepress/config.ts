@@ -39,7 +39,8 @@ export default defineConfig({
           { text: 'Send 与公开访问', link: '/guide/core/send' },
           { text: '导入与导出', link: '/guide/core/import-export' },
           { text: 'API 参考', link: '/guide/core/api-reference' },
-          { text: '域名规则与图标', link: '/guide/core/domain-icons' }
+          { text: '域名规则', link: '/guide/core/domain-rules' },
+          { text: '网站图标', link: '/guide/core/website-icons' }
         ]
       },
       {
@@ -69,6 +70,8 @@ export default defineConfig({
           { text: '前端架构', link: '/guide/architecture/frontend' },
           { text: '数据模型与迁移', link: '/guide/architecture/storage-schema' },
           { text: '兼容性策略', link: '/guide/architecture/compatibility' },
+          { text: '实时通知', link: '/guide/architecture/realtime-notifications' },
+          { text: '变更维护地图', link: '/guide/architecture/change-map' },
           { text: '开发与代码约定', link: '/guide/architecture/development' }
         ]
       },

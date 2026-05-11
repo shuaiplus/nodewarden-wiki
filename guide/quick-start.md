@@ -12,11 +12,11 @@
 - 如果你打算用 KV 模式，把部署命令改成 `npm run deploy:kv`
 5. 等部署完成后，打开生成的 Workers 域名
 
-
-
 - Workers 默认域名在部分网络环境不可直连。如需自定义域名，到 [Workers 设置](https://dash.cloudflare.com/?to=/:account/workers/services/view/nodewarden/production/settings)里添加。
 
 - 页面提示缺少 `JWT_SECRET` 时，到 Workers 设置里添加 Secret。正式环境至少使用 32 个字符以上的随机字符串，不要使用临时值或示例值。
+
+这套流程里，用户实际做的是把代码交给 Cloudflare 构建并部署。代码里的 `wrangler.toml` 或 `wrangler.kv.toml` 决定绑定名，Worker 第一次处理请求时会自动初始化 D1 schema，不需要用户上传 SQL。
 
 ## CLI 部署
 
@@ -51,6 +51,15 @@ npx wrangler secret put JWT_SECRET
 
 如果同时绑定了 R2 和 KV，会优先选择 R2。
 
+选择存储模式时，本质上是在决定 `src/services/blob-store.ts` 会把附件和 Send 文件正文写到哪里：
+
+| 模式 | 配置文件 | 绑定名 | 代码行为 |
+| --- | --- | --- | --- |
+| R2 | `wrangler.toml` | `ATTACHMENTS` | 优先写 R2，适合正式附件和文件 Send。 |
+| KV | `wrangler.kv.toml` | `ATTACHMENTS_KV` | 不需要 R2，但单对象会受 KV 25 MiB 限制。 |
+
+D1 里只保存附件和 Send 文件的元数据。真正的二进制正文不在 D1 表里。
+
 ## 首次注册
 
 首次打开网址后，第一个注册的用户为管理员。注册接口会检查：
@@ -60,6 +69,24 @@ npx wrangler secret put JWT_SECRET
 - KDF 参数是否满足最低要求。
 
 第一个用户注册成功后，服务端会写入 `registered=true`，并记录 `user.register.first_admin` 审计日志。
+
+后续注册默认需要邀请码。邀请码由管理员在网页端创建，服务端会把邀请码写入 `invites` 表，注册成功后标记为已使用。
+
+## 第一次打开页面时发生什么
+
+浏览器打开 Worker 域名时，Worker 会先尝试返回 `dist/` 里的前端资源。前端启动后会请求：
+
+```text
+GET /api/web-bootstrap
+```
+
+这个接口会返回：
+
+- 当前默认 KDF 迭代次数。
+- `JWT_SECRET` 是否缺失、过短或仍是示例值。
+- 当前是否需要邀请码注册。
+
+如果 `JWT_SECRET` 不安全，网页端会显示配置警告，认证 API 也会被服务端拦住。这个设计是为了避免用户在弱密钥实例里注册真实密码库。
 
 ## 第一次登录后应该做什么
 

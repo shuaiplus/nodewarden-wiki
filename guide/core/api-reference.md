@@ -18,7 +18,7 @@
 | `POST` | `/identity/accounts/recover-2fa`, `/api/accounts/recover-2fa` | 使用恢复码关闭 TOTP。 |
 | `GET` | `/api/devices/knowndevice` | 官方客户端已知设备检查。 |
 | `PUT`, `POST` | `/api/devices/identifier/{id}/clear-token` | 登录前设备 token 清理兼容路径，返回空 200。 |
-| `GET` | `/icons/{hostname}/icon.png` | 网站图标代理。 |
+| `GET` | `/icons/{hostname}/icon.png` | 网站图标代理，细节见 [网站图标](/guide/core/website-icons)。 |
 | `POST`, `GET` | `/notifications/hub/negotiate`, `/notifications/hub` | 通知 negotiate 和 WebSocket。 |
 
 ## 账号与认证

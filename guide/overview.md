@@ -54,4 +54,5 @@ NodeWarden 的代码里有几个长期原则：
 - [整体架构](/guide/architecture/overview)
 - [后端路由与服务层](/guide/architecture/backend-routing-services)
 - [前端架构](/guide/architecture/frontend)
+- [变更维护地图](/guide/architecture/change-map)
 - [开发与代码约定](/guide/architecture/development)

@@ -36,7 +36,7 @@ NodeWarden 运行在 Cloudflare Workers 上，受平台限制影响：
 | 通知 | 提供 Durable Object 通知中心，但不同客户端仍应以 `/api/sync` 为最终一致来源。 |
 | API Key 登录 | 支持个人 API Key 的 `client_credentials` 登录；API Key 只负责认证，不能替代主密码解锁密码库。 |
 | Passkey / FIDO2 字段 | 保留和展示密码项中的 FIDO2 兼容字段；不等同于完整账号级 WebAuthn 登录。 |
-| 网站图标 | 通过上游图标服务代理，可能超时、缺失或回退到默认图标。 |
+| 网站图标 | 通过两个上游图标源顺序代理，可能超时、缺失或回退到本地图标；细节见 [网站图标](/guide/core/website-icons)。 |
 | 远程备份 | 支持 WebDAV 与 S3 兼容存储；具体稳定性仍取决于服务商的 WebDAV/S3 行为。 |
 
 ## 安全边界

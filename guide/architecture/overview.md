@@ -80,6 +80,8 @@ Durable Object `NotificationsHub` 用于网页端事件通知，例如：
 
 这让网页端不用靠盲等来感知长任务状态。
 
+通知层细节见 [实时通知](/guide/architecture/realtime-notifications)。它是刷新加速和进度通道，最终数据仍以 API 和 `/api/sync` 为准。
+
 ## 前端构建
 
 `webapp/` 使用 Vite + Preact。构建脚本：
