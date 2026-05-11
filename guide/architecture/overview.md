@@ -49,15 +49,20 @@ src/router.ts
 结构化数据在 D1：
 
 - users
+- user_revisions
 - folders
 - ciphers
 - attachments
 - sends
 - refresh_tokens
 - devices
+- trusted_two_factor_device_tokens
 - domain_settings
+- invites
 - config
 - audit_logs
+- login_attempts_ip
+- used_attachment_download_tokens
 
 二进制数据在 R2/KV：
 
@@ -100,4 +105,3 @@ src/index.ts -> scheduled() -> runScheduledBackupIfDue()
 ```
 
 如果数据库初始化失败，定时备份会跳过并记录日志。
-

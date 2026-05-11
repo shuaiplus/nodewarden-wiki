@@ -17,9 +17,9 @@ hero:
       link: https://nodewarden-demo.pages.dev/
 
 features:
-  - title: 部署足够简单
+  - title: 部署流程清晰
     details: Fork 后接入 Cloudflare Workers，绑定 D1、R2 或 KV，再保存 JWT_SECRET 即可开始使用。
-  - title: 备份不是摆设
+  - title: 备份流程完整
     details: 支持 WebDAV 与 S3 兼容存储，配置密钥加密保存，远程上传后做校验，恢复前做结构验证。
   - title: 面向官方客户端兼容
     details: /api/sync、附件、Send、导入导出和设备会话都按 Bitwarden 客户端行为持续兼容。

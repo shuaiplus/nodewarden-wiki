@@ -38,7 +38,7 @@ Worker 初始化时会读取 `config.schema.version`。如果不同，就执行 
 | `devices` | 设备、session stamp、设备加密 key。 |
 | `trusted_two_factor_device_tokens` | 记住设备 token hash。 |
 | `login_attempts_ip` | 登录失败和临时锁定。 |
-| `used_attachment_download_tokens` | 一次性附件下载 token 消费记录。 |
+| `used_attachment_download_tokens` | 一次性附件与 Send 文件下载 token 消费记录。 |
 
 ## 外键与索引
 
@@ -72,3 +72,4 @@ D1 `.bind()` 不接受 `undefined`。`StorageService.safeBind()` 会把 `undefin
 6. 判断是否影响 `/api/sync`。
 7. 判断是否需要更新审计日志或限流。
 
+不要把运行态表误认为可迁移数据。`refresh_tokens`、`devices`、`trusted_two_factor_device_tokens`、`login_attempts_ip`、`used_attachment_download_tokens`、备份运行锁和审计日志都属于当前实例运行状态，默认不进入实例备份。

@@ -31,6 +31,8 @@ sha256:<digest>
 
 刷新 token 时，旧 refresh token 会被缩短到一个短重叠窗口，用来吸收浏览器扩展 popup/background 同时刷新的竞态。
 
+网页端使用 `X-NodeWarden-Web-Session: 1` 登录后，refresh token 会写入 `nodewarden_web_refresh` HttpOnly cookie。网页本地存储不应该保存 refresh token 明文；官方客户端和浏览器扩展仍按自身协议保存并提交 refresh token。
+
 ## 设备绑定
 
 如果客户端提交 device identifier，服务端会创建或更新设备记录，并把：
@@ -46,7 +48,7 @@ sha256:<digest>
 
 附件下载 token 默认 5 分钟有效，并带有 `jti`。服务端会记录已消费的 jti，防止同一个下载链接反复使用。
 
-Send 文件下载、附件上传、Send 文件上传也都有独立短 token。它们都使用 JWT_SECRET 签名。
+附件上传、Send 文件上传、Send 文件下载也都有独立短 token。公开 Send V2 访问会先换取 `send_access` token，再用它访问文件内容。它们都使用 JWT_SECRET 签名。
 
 ## JWT_SECRET 变更影响
 
@@ -62,4 +64,3 @@ JWT_SECRET 变化后：
 ## HMAC key 缓存
 
 `src/utils/jwt.ts` 会缓存由 JWT_SECRET 导入的 HMAC CryptoKey，避免每次签名/验证都重复 importKey。缓存 key 就是 secret 字符串。
-

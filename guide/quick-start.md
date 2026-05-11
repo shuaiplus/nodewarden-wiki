@@ -1,10 +1,7 @@
 # 快速开始
 
-开始之前可以先打开 Demo 看界面：
-
-[NodeWarden 在线 Demo](https://nodewarden-demo.pages.dev/)
-
-Demo 只用于体验网页端交互。正式使用必须部署自己的实例，并保存好主密码、`JWT_SECRET` 和备份目标。
+想先看界面，可以打开 [NodeWarden 在线 Demo](https://nodewarden-demo.pages.dev/)
+- Demo 只用于体验网页端交互，不会保存真实数据。
 
 ## 可视化快速部署
 
@@ -15,10 +12,11 @@ Demo 只用于体验网页端交互。正式使用必须部署自己的实例，
 - 如果你打算用 KV 模式，把部署命令改成 `npm run deploy:kv`
 5. 等部署完成后，打开生成的 Workers 域名
 
+
+
 - Workers 默认域名在部分网络环境不可直连。如需自定义域名，到 [Workers 设置](https://dash.cloudflare.com/?to=/:account/workers/services/view/nodewarden/production/settings)里添加。
 
-- 页面提示缺少 `JWT_SECRET` 时，到 Workers 设置里添加 Secret。正式环境至少使用 32 个字符以上的随机字符串，不要临时乱填。
-
+- 页面提示缺少 `JWT_SECRET` 时，到 Workers 设置里添加 Secret。正式环境至少使用 32 个字符以上的随机字符串，不要使用临时值或示例值。
 
 ## CLI 部署
 

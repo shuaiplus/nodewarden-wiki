@@ -22,6 +22,8 @@ NodeWarden 的网页密码库是仓库内自研的 Vite + Preact 应用，不依
 
 主界面可用后，`app-preload.ts` 会在后台预热部分懒加载资源和 locale chunk，降低后续页面切换等待。
 
+网页端登录使用 `X-NodeWarden-Web-Session: 1` 标记浏览器会话。服务端会把 refresh token 放进 HttpOnly cookie，前端本地只保留邮箱、认证模式和解锁所需的会话状态，避免把 refresh token 明文写入 localStorage。
+
 ## 页面分层
 
 | 区域 | 主要组件 |
@@ -49,13 +51,29 @@ NodeWarden 的网页密码库是仓库内自研的 Vite + Preact 应用，不依
 
 ## 路由与权限
 
-前端同时支持普通路径和部分 hash route 兼容。新增页面时要检查：
+前端同时支持普通路径和部分 hash route 兼容。主要路由包括：
+
+| 路由 | 页面 |
+| --- | --- |
+| `/login`, `/register`, `/lock`, `/recover-2fa` | 登录、注册、锁定和 2FA 恢复。 |
+| `/vault`, `/vault/totp` | 密码库和验证码视图。 |
+| `/sends` | Send 管理。 |
+| `/send/{id}` | 公开 Send 访问，可带 key。 |
+| `/settings`, `/settings/account`, `/settings/domain-rules` | 设置首页、账号设置和域名规则。 |
+| `/security/devices` | 设备管理。 |
+| `/backup` | 备份中心，仅管理员可进入。 |
+| `/admin` | 用户和邀请管理，仅管理员可进入。 |
+| `/backup/import-export` 及旧别名 | 导入导出工具。 |
+
+新增页面时要检查：
 
 - 登录前是否可访问。
 - 登录后是否需要管理员权限。
 - 移动端标题、导航和返回路径是否正确。
 - 未知路径是否落到 `NotFoundPage.tsx`。
 - 公开 Send 路由是否和普通登录态路由冲突。
+
+移动端的 `/settings` 是设置入口页；桌面端更偏向直接进入账号设置。不要只验证一个视口。
 
 ## i18n
 
@@ -68,6 +86,15 @@ NodeWarden 的网页密码库是仓库内自研的 Vite + Preact 应用，不依
 - 语言包按需加载，失败时硬 fallback 到英文。
 - 新增文案必须同步所有 locale，并运行 `npm run i18n:validate`。
 - 不要在模块顶层调用 `t()` 生成常量，避免异步初始化前冻结成 raw key。
+
+生产构建会把非英文语言包拆成独立 chunk。新增语言时要同时更新 `Locale`、可用语言列表、浏览器语言识别、动态 loader、校验脚本和完整 locale 文件。
+
+## 构建策略
+
+`webapp/vite.config.ts` 里有两个需要维护者知道的策略：
+
+- 普通生产构建会写入 noindex robots；Demo 构建允许被索引。
+- 主要应用页面会被合到 `app-suite` chunk，非英文 locale 单独拆包，避免首屏一次性加载所有语言和大页面。
 
 ## 样式与移动端
 

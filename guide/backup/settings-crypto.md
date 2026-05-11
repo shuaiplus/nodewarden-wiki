@@ -58,6 +58,8 @@ portable 部分使用随机 DEK：
 
 这样导出的备份里不会出现可直接给当前服务器使用的 runtime 密文，但保留了“管理员可恢复”的 portable 数据。
 
+当前 portable wrapping 与 Bitwarden/浏览器兼容边界保持一致，使用 RSA-OAEP 和 SHA-1 hash 参数。这不是给新业务自创加密协议的入口；修改它会影响旧备份恢复和管理员密钥解包。
+
 ## 为什么需要双层
 
 只有 runtime 不够：恢复到新实例后，如果 JWT_SECRET 不同，备份配置就完全解不开。
@@ -77,7 +79,7 @@ portable 部分使用随机 DEK：
 
 ## 没有管理员公钥怎么办
 
-如果系统还没有 active admin 公钥，保存备份设置时会退回普通 JSON。这个情况主要出现在早期初始化或兼容状态。正常注册流程要求用户公钥和加密私钥存在，因此正式实例一般会使用加密信封。
+`encryptBackupSettingsEnvelope()` 本身要求至少有一个 active admin 公钥。实际保存时，`saveBackupSettings()` 会先检查管理员公钥；如果系统还没有可用公钥，会退回普通 JSON。这个情况主要出现在早期初始化或兼容状态。正常注册流程要求用户公钥和加密私钥存在，因此正式实例一般会使用加密信封。
 
 ## 实践建议
 
@@ -85,4 +87,3 @@ portable 部分使用随机 DEK：
 - 不要丢 JWT_SECRET。
 - 恢复后第一时间进入备份中心，看是否提示需要修复。
 - 至少保留一个 active admin 账号，并确保它有 publicKey。
-
