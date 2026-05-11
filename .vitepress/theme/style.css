@@ -15,22 +15,36 @@
   --nw-line: rgba(96, 165, 250, 0.2);
 }
 
-.VPHome {
-  background:
-    radial-gradient(circle at 20% 12%, rgba(37, 99, 235, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(240, 246, 255, 0.72), transparent 420px);
-  margin-bottom: 100px;
-}
 
 .dark .VPHome {
   background:
-    radial-gradient(circle at 20% 12%, rgba(96, 165, 250, 0.12), transparent 30%),
-    linear-gradient(180deg, rgba(15, 23, 42, 0.72), transparent 420px);
+    radial-gradient(circle at calc(50% + 300px) 270px, rgba(96, 165, 250, 0.16), rgba(37, 99, 235, 0.06) 24%, transparent 36%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.24) 500px, rgba(15, 23, 42, 0) 100%);
+}
+
+body:has(.VPHome) .VPNavBarSearch {
+  display: none;
+}
+
+body:has(.VPHome) .VPFooter {
+  border-top-color: rgba(37, 99, 235, 0.08);
+  background: color-mix(in srgb, var(--vp-c-bg) 96%, rgba(240, 246, 255, 0.5));
+}
+
+.dark body:has(.VPHome) .VPFooter {
+  border-top-color: rgba(96, 165, 250, 0.12);
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, rgba(15, 23, 42, 0.5));
 }
 
 @media (min-width: 768px) {
   .VPHome.VPHome {
-    margin-bottom: 100px;
+    margin-bottom: 0;
+    padding-bottom: 56px;
+  }
+
+  .VPHomeHero.VPHomeHero {
+    padding-top: 118px;
+    padding-bottom: 64px;
   }
 }
 
@@ -40,7 +54,7 @@
 }
 
 .VPHomeHero .name {
-  font-size: 56px;
+  font-size: 54px;
   line-height: 1.05;
   font-weight: 800;
 }
@@ -48,21 +62,34 @@
 .VPHomeHero .text {
   max-width: 620px;
   margin-top: 10px;
-  font-size: 40px;
+  font-size: 36px;
   line-height: 1.18;
   font-weight: 760;
 }
 
 .VPHomeHero .image-bg {
-  opacity: 0.16;
+  opacity: 0.08;
 }
 
 .VPHomeHero .image-src {
-  max-width: 300px;
-  max-height: 250px;
+  max-width: 270px;
+  max-height: 230px;
 }
 
 @media (max-width: 767px) {
+  .VPHome,
+  .dark .VPHome {
+    background:
+      radial-gradient(circle at 50% 245px, rgba(37, 99, 235, 0.12), rgba(96, 165, 250, 0.04) 26%, transparent 42%),
+      linear-gradient(180deg, rgba(248, 251, 255, 0.8), rgba(248, 251, 255, 0.22) 500px, rgba(255, 255, 255, 0) 100%);
+  }
+
+  .dark .VPHome {
+    background:
+      radial-gradient(circle at 50% 245px, rgba(96, 165, 250, 0.15), rgba(37, 99, 235, 0.055) 26%, transparent 42%),
+      linear-gradient(180deg, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.24) 500px, rgba(15, 23, 42, 0) 100%);
+  }
+
   .VPHomeHero .name {
     font-size: 40px;
     line-height: 1.08;
@@ -74,6 +101,11 @@
     font-size: 28px;
     line-height: 1.22;
   }
+
+  .VPHomeHero .image-src {
+    max-width: 220px;
+    max-height: 190px;
+  }
 }
 
 .nw-home {
@@ -83,10 +115,10 @@
 }
 
 .nw-panel {
-  border: 1px solid var(--nw-line);
-  background: color-mix(in srgb, var(--vp-c-bg) 86%, transparent);
+  border: 0;
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 82%, var(--vp-c-bg));
   border-radius: 8px;
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
 }
 
 .nw-snapshot {
