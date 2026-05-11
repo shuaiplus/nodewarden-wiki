@@ -1,6 +1,6 @@
 # Quick Start
 
-If you want to see the interface first, open the [NodeWarden online demo](https://nodewarden-demo.pages.dev/).
+If you want to see the interface first, open the [NodeWarden online demo](https://demo.nodewarden.app/).
 
 - The demo is only for trying the Web Vault experience. Do not store real data in it.
 

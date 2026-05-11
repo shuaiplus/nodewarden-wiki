@@ -1,6 +1,6 @@
 # 快速开始
 
-想先看界面，可以打开 [NodeWarden 在线 Demo](https://nodewarden-demo.pages.dev/)
+想先看界面，可以打开 [NodeWarden 在线 Demo](https://demo.nodewarden.app/)
 - Demo 只用于体验网页端交互，不会保存真实数据。
 
 ## 可视化快速部署

@@ -14,7 +14,7 @@ hero:
       link: /zh/guide/quick-start
     - theme: alt
       text: 在线 Demo
-      link: https://nodewarden-demo.pages.dev/
+      link: https://demo.nodewarden.app/
 
 features:
   - title: 部署流程清晰

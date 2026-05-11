@@ -6,14 +6,14 @@ const englishNav: DefaultTheme.NavItem[] = [
   { text: 'Quick Start', link: '/guide/quick-start' },
   { text: 'Backup Center', link: '/guide/backup/overview' },
   { text: 'Architecture', link: '/guide/architecture/overview' },
-  { text: 'Demo', link: 'https://nodewarden-demo.pages.dev/' }
+  { text: 'Demo', link: 'https://demo.nodewarden.app/' }
 ];
 
 const chineseNav: DefaultTheme.NavItem[] = [
   { text: '快速开始', link: '/zh/guide/quick-start' },
   { text: '备份中心', link: '/zh/guide/backup/overview' },
   { text: '架构设计', link: '/zh/guide/architecture/overview' },
-  { text: 'Demo', link: 'https://nodewarden-demo.pages.dev/' }
+  { text: 'Demo', link: 'https://demo.nodewarden.app/' }
 ];
 
 const englishSidebar: DefaultTheme.Sidebar = {

@@ -14,7 +14,7 @@ hero:
       link: /guide/quick-start
     - theme: alt
       text: Online Demo
-      link: https://nodewarden-demo.pages.dev/
+      link: https://demo.nodewarden.app/
 
 features:
   - title: Clear Cloudflare deployment
