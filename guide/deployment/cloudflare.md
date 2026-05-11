@@ -1,26 +1,26 @@
-# Cloudflare 参数
+# Cloudflare Settings
 
-NodeWarden 的默认部署目标是 Cloudflare Workers。仓库会把前端构建到 `dist/`，Worker 同时处理 API 和静态资源。
+NodeWarden's default deployment target is Cloudflare Workers. The repository builds the frontend into `dist/`, and the Worker serves both APIs and static assets.
 
-## 运行结构
+## Runtime structure
 
 ```text
-浏览器 / 官方客户端
+Browser / official client
         |
         v
 Cloudflare Worker
-  |-- 静态资源 ASSETS -> dist/
-  |-- API 路由 -> src/router.ts
-  |-- D1 -> 账号、密码项、文件夹、附件元数据、Send、配置
-  |-- R2/KV -> 附件与 Send 文件正文
-  |-- Durable Object -> 前端实时通知
+  |-- Static assets via ASSETS -> dist/
+  |-- API routes -> src/router.ts
+  |-- D1 -> users, ciphers, folders, attachment metadata, Send, config
+  |-- R2/KV -> attachment and Send file bodies
+  |-- Durable Object -> frontend realtime notifications
 ```
 
-`src/index.ts` 会先尝试用 `ASSETS` 返回前端资源。属于 `/api/`、`/identity/`、`/icons/`、`/notifications/`、`/.well-known/`、`/config` 等路径的请求会交给 Worker API 处理。
+`src/index.ts` first tries to serve frontend assets through `ASSETS`. Requests under `/api/`, `/identity/`, `/icons/`, `/notifications/`, `/.well-known/`, `/config`, and similar API paths are handled by the Worker API.
 
-## wrangler.toml 绑定
+## `wrangler.toml` bindings
 
-默认 `wrangler.toml` 使用这些绑定：
+The default `wrangler.toml` uses these bindings:
 
 ```toml
 name = "nodewarden"
@@ -49,57 +49,55 @@ binding = "ATTACHMENTS"
 bucket_name = "nodewarden-attachments"
 ```
 
-`crons = [ "*/5 * * * *" ]` 会每 5 分钟唤起一次 scheduled handler。真正是否执行备份，由备份配置里的时区、开始时间、间隔和上次运行时间决定。
+`crons = [ "*/5 * * * *" ]` wakes the scheduled handler every 5 minutes. Whether a backup actually runs depends on the backup target timezone, start time, interval, and last run time.
 
-## 必需资源
+## Required resources
 
-| 绑定 | 必需 | 用途 |
+| Binding | Required | Purpose |
 | --- | --- | --- |
-| `DB` | 是 | D1 数据库，保存结构化数据。 |
-| `JWT_SECRET` | 是 | JWT、附件短链、Send 短链、备份配置 runtime 加密都会用到。 |
-| `NOTIFICATIONS_HUB` | 是 | 用于网页端实时同步、备份进度通知。 |
-| `ASSETS` | 是 | 部署网页前端静态资源。 |
-| `ATTACHMENTS` | 推荐 | R2 附件和 Send 文件存储。 |
-| `ATTACHMENTS_KV` | 可选 | KV 附件和 Send 文件存储 fallback。 |
+| `DB` | Yes | D1 database for structured data. |
+| `JWT_SECRET` | Yes | Used by JWTs, attachment short links, Send short links, and backup settings runtime encryption. |
+| `NOTIFICATIONS_HUB` | Yes | Realtime sync and backup progress notifications for the Web Vault. |
+| `ASSETS` | Yes | Frontend static assets. |
+| `ATTACHMENTS` | Recommended | R2 storage for attachments and Send files. |
+| `ATTACHMENTS_KV` | Optional | KV fallback storage for attachments and Send files. |
 
-## 数据库自动初始化
+## Automatic database initialization
 
-NodeWarden 不要求你手动执行 SQL。Worker 第一次处理请求时会调用：
+NodeWarden does not require you to run SQL manually. When the Worker handles its first request, it calls:
 
 - `src/index.ts` -> `ensureDatabaseInitialized()`
 - `src/services/storage.ts` -> `initializeDatabase()`
 - `src/services/storage-schema.ts` -> `ensureStorageSchema()`
 
-初始化逻辑会先创建 `config` 表，然后读取 `config.schema.version`。如果版本不同，会运行一批幂等 SQL，并把新版本写回 `config` 表。
+The initializer creates the `config` table first, then reads `config.schema.version`. If the version changed, it runs idempotent SQL and writes the new version back.
 
-这意味着更新后只要 schema 版本变了，现有实例会自动补齐表、列和索引。
+After an update, existing instances automatically fill in missing tables, columns, and indexes as long as the schema version was changed correctly.
 
-## R2 部署
+## R2 deployment
 
-R2 是推荐模式。优点是大文件限制更宽松，附件和 Send 文件不用塞进 D1。
+R2 is the recommended mode. It has a wider large-file path and keeps attachment and Send file bodies out of D1.
+
+Use `wrangler.toml`, bind an R2 bucket named `ATTACHMENTS`, and deploy with:
 
 ```powershell
 npm run deploy
 ```
 
-确保 Cloudflare 项目里有 R2 bucket，并且绑定名称叫 `ATTACHMENTS`。
+The default attachment soft limit is controlled by NodeWarden config and is currently 100 MB. This is independent from D1 because the binary body is stored in R2.
 
-## KV 部署
+## KV deployment
 
-KV 模式适合不想绑卡、只需要小附件的实例。
+KV mode is useful when you want a no-card setup or only small attachments. Use `wrangler.kv.toml`, bind `ATTACHMENTS_KV`, and deploy with:
 
 ```powershell
 npm run deploy:kv
 ```
 
-KV 模式使用 `wrangler.kv.toml`，绑定名是 `ATTACHMENTS_KV`。代码会把单个对象限制压到 Cloudflare KV 的 25 MiB 以内。
+KV single-object limits apply. NodeWarden caps attachment and Send file bodies to 25 MiB in KV mode.
 
-## Demo 部署
+## Durable Object migrations
 
-仓库有 Demo 专用脚本：
+Realtime notifications use `NotificationsHub`. If Cloudflare asks you to apply a Durable Object migration, make sure the binding and migration class name still match the project config.
 
-```powershell
-npm run deploy:demo
-```
-
-这个脚本会先执行 `npm run build:demo`，再把 `dist` 部署到 Pages 项目。正式实例不要用 Demo 模式保存真实数据。
+Without the Durable Object binding, core vault APIs can still exist, but realtime Web Vault refreshes, device status, and backup progress notifications will break.

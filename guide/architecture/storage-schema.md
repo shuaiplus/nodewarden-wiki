@@ -1,48 +1,48 @@
-# 数据模型与迁移
+# Storage Schema
 
-NodeWarden 的 D1 schema 有两份来源：
+NodeWarden's D1 schema has two sources:
 
-- `migrations/0001_init.sql`：初始迁移文件。
-- `src/services/storage-schema.ts`：运行时自动初始化和补齐 schema。
+- `migrations/0001_init.sql`: initial migration file.
+- `src/services/storage-schema.ts`: runtime automatic initialization and schema completion.
 
-两者必须保持同步。
+They must stay in sync.
 
-## schema 版本
+## Schema version
 
-`src/services/storage.ts` 里有：
+`src/services/storage.ts` contains:
 
 ```ts
 const STORAGE_SCHEMA_VERSION_KEY = 'schema.version';
 const STORAGE_SCHEMA_VERSION = '...';
 ```
 
-Worker 初始化时会读取 `config.schema.version`。如果不同，就执行 `ensureStorageSchema()`，然后写回新版本。
+When the Worker initializes, it reads `config.schema.version`. If the value differs, it runs `ensureStorageSchema()` and writes the new version.
 
-新增表、列、索引时必须 bump `STORAGE_SCHEMA_VERSION`。否则旧实例不会自动重跑 schema 初始化。
+When adding tables, columns, or indexes, bump `STORAGE_SCHEMA_VERSION`. Otherwise old instances will not rerun schema initialization.
 
-## 主要表
+## Main tables
 
-| 表 | 作用 |
+| Table | Purpose |
 | --- | --- |
-| `config` | 运行配置、schema 版本、备份配置、运行锁。 |
-| `users` | 用户、主密码验证 hash、加密 key、角色、状态、TOTP、API key。 |
-| `domain_settings` | 用户域名匹配规则。 |
-| `user_revisions` | 每个用户的 vault revision date。 |
-| `folders` | 文件夹。 |
-| `ciphers` | 密码项主体和加密 JSON。 |
-| `attachments` | 附件元数据。 |
-| `sends` | Send 主体。 |
-| `refresh_tokens` | refresh token hash 和设备绑定。 |
-| `invites` | 邀请码。 |
-| `audit_logs` | 审计日志。 |
-| `devices` | 设备、session stamp、设备加密 key。 |
-| `trusted_two_factor_device_tokens` | 记住设备 token hash。 |
-| `login_attempts_ip` | 登录失败和临时锁定。 |
-| `used_attachment_download_tokens` | 一次性附件与 Send 文件下载 token 消费记录。 |
+| `config` | Runtime config, schema version, backup config, and run locks. |
+| `users` | Users, master password verification hash, encrypted key, role, status, TOTP, API key. |
+| `domain_settings` | User domain matching rules. |
+| `user_revisions` | Per-user vault revision date. |
+| `folders` | Folders. |
+| `ciphers` | Cipher body and encrypted JSON. |
+| `attachments` | Attachment metadata. |
+| `sends` | Send records. |
+| `refresh_tokens` | Refresh token hash and device binding. |
+| `invites` | Invite codes. |
+| `audit_logs` | Audit logs. |
+| `devices` | Devices, session stamp, and device encryption key. |
+| `trusted_two_factor_device_tokens` | Remembered-device token hashes. |
+| `login_attempts_ip` | Login failures and temporary lockouts. |
+| `used_attachment_download_tokens` | One-time attachment and Send file download token consumption. |
 
-## 外键与索引
+## Foreign keys and indexes
 
-密码库核心表按用户隔离，并有常用索引：
+Vault core tables are isolated by user and have common indexes:
 
 - `idx_ciphers_user_updated`
 - `idx_ciphers_user_archived`
@@ -54,22 +54,22 @@ Worker 初始化时会读取 `config.schema.version`。如果不同，就执行 
 - `idx_sends_user_updated`
 - `idx_sends_user_deletion`
 
-这些索引直接影响 `/api/sync`、分页列表、回收站、归档和批量操作性能。
+These indexes directly affect `/api/sync`, paginated lists, trash, archive, and bulk operation performance.
 
-## D1 bind 细节
+## D1 bind detail
 
-D1 `.bind()` 不接受 `undefined`。`StorageService.safeBind()` 会把 `undefined` 转成 `null`，避免客户端传来的未知字段或缺省字段导致运行时错误。
+D1 `.bind()` does not accept `undefined`. `StorageService.safeBind()` converts `undefined` to `null`, preventing runtime errors when clients submit unknown or omitted fields.
 
-## 新增持久数据的 checklist
+## Persistent data checklist
 
-新增表或字段时检查：
+When adding a table or field:
 
-1. 改 `migrations/0001_init.sql`。
-2. 改 `src/services/storage-schema.ts`。
-3. bump `STORAGE_SCHEMA_VERSION`。
-4. 判断是否进入实例备份。
-5. 如果进入备份，改 `backup-archive.ts`、`backup-import.ts` 和前端备份类型。
-6. 判断是否影响 `/api/sync`。
-7. 判断是否需要更新审计日志或限流。
+1. Update `migrations/0001_init.sql`.
+2. Update `src/services/storage-schema.ts`.
+3. Bump `STORAGE_SCHEMA_VERSION`.
+4. Decide whether it belongs in instance backups.
+5. If backed up, update `backup-archive.ts`, `backup-import.ts`, and frontend backup types.
+6. Decide whether `/api/sync` is affected.
+7. Decide whether audit logs or rate limits are needed.
 
-不要把运行态表误认为可迁移数据。`refresh_tokens`、`devices`、`trusted_two_factor_device_tokens`、`login_attempts_ip`、`used_attachment_download_tokens`、备份运行锁和审计日志都属于当前实例运行状态，默认不进入实例备份。
+Do not mistake runtime tables for migratable data. `refresh_tokens`, `devices`, `trusted_two_factor_device_tokens`, `login_attempts_ip`, `used_attachment_download_tokens`, backup run locks, and audit logs are current-instance runtime state and do not enter instance backups by default.

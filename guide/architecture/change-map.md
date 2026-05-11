@@ -1,95 +1,95 @@
-# 变更维护地图
+# Change Map
 
-这页不是功能说明，而是给维护者和贡献者用的改动地图。改 NodeWarden 时，先判断“用户会做什么”，再顺着请求、存储、同步、备份、前端状态和自动化边界一起看。
+This page is for maintainers and contributors. Before changing NodeWarden, first identify what the user action is, then follow the request, storage, sync, backup, frontend state, and automation boundaries together.
 
-## 先判断改动属于哪一类
+## Classify the change
 
-| 改动类型 | 主要入口 | 必须一起检查 |
+| Change type | Main entry | Check together |
 | --- | --- | --- |
-| 登录、注册、主密码、API Key | `src/handlers/identity.ts`、`src/handlers/accounts.ts`、`src/services/auth.ts` | `securityStamp`、refresh token、设备记录、官方客户端响应字段、网页端 `app-auth.ts`。 |
-| 密码项、文件夹、同步 | `src/handlers/ciphers.ts`、`src/handlers/folders.ts`、`src/handlers/sync.ts` | revision date、`cipherToResponse()`、未知字段透传、导入导出、`/api/sync` 缓存、前端解密。 |
-| 附件 | `src/handlers/attachments.ts`、`src/services/blob-store.ts` | D1 附件元数据、R2/KV blob、短 token、一次性下载 jti、备份附件恢复。 |
-| Send | `src/handlers/sends*.ts`、`src/services/storage-send-repo.ts` | 公开访问 token、密码校验、文件 blob、访问次数、删除日期、备份边界。 |
-| 域名规则 | `src/handlers/domains.ts`、`src/services/domain-rules.ts` | 静态规则文件、用户排除项、D1 `domain_settings`、全局域名同步 Action。 |
-| 网站图标 | `src/router-public.ts`、`webapp/src/components/vault/WebsiteIcon.tsx` | 上游源顺序、fallback、缓存 TTL、前端懒加载和错误缓存。 |
-| 实时通知 | `src/durable/notifications-hub.ts`、`src/handlers/notifications.ts`、`webapp/src/App.tsx` | SignalR handshake、用户 DO、设备定向、vault sync 和备份进度。 |
-| 备份中心 | `src/handlers/backup.ts`、`src/services/backup-*.ts`、`shared/backup-schema.ts` | 运行锁、配置加密信封、ZIP manifest、远程附件索引、导入 shadow 表、审计日志。 |
-| 数据库 schema | `migrations/0001_init.sql`、`src/services/storage-schema.ts`、`src/services/storage.ts` | schema version、备份导出导入、前端类型、旧实例自动补齐。 |
-| 前端页面或流程 | `webapp/src/App.tsx`、`webapp/src/components/*`、`webapp/src/lib/api/*` | 路由、移动端、深色主题、i18n、React Query 刷新、后台预加载。 |
-| 文案和语言 | `webapp/src/lib/i18n/*` | 所有 locale 必须完整更新，并运行 `npm run i18n:validate`。 |
+| Login, registration, master password, API key | `src/handlers/identity.ts`, `src/handlers/accounts.ts`, `src/services/auth.ts` | `securityStamp`, refresh tokens, devices, official-client response fields, Web Vault `app-auth.ts`. |
+| Ciphers, folders, sync | `src/handlers/ciphers.ts`, `src/handlers/folders.ts`, `src/handlers/sync.ts` | Revision date, `cipherToResponse()`, unknown field passthrough, import/export, `/api/sync` cache, frontend decryption. |
+| Attachments | `src/handlers/attachments.ts`, `src/services/blob-store.ts` | D1 metadata, R2/KV blob, short tokens, one-time download `jti`, backup attachment restore. |
+| Send | `src/handlers/sends*.ts`, `src/services/storage-send-repo.ts` | Public access token, password verification, file blob, access count, deletion date, backup boundary. |
+| Domain rules | `src/handlers/domains.ts`, `src/services/domain-rules.ts` | Static rule files, user exclusions, D1 `domain_settings`, global domain sync Action. |
+| Website icons | `src/router-public.ts`, `webapp/src/components/vault/WebsiteIcon.tsx` | Upstream order, fallback, cache TTL, frontend lazy loading and error cache. |
+| Realtime notifications | `src/durable/notifications-hub.ts`, `src/handlers/notifications.ts`, `webapp/src/App.tsx` | SignalR handshake, user DO, device targeting, vault sync and backup progress. |
+| Backup center | `src/handlers/backup.ts`, `src/services/backup-*.ts`, `shared/backup-schema.ts` | Run lock, settings encryption envelope, ZIP manifest, remote attachment index, shadow-table import, audit log. |
+| Database schema | `migrations/0001_init.sql`, `src/services/storage-schema.ts`, `src/services/storage.ts` | Schema version, backup export/import, frontend types, automatic initialization for old instances. |
+| Frontend page or flow | `webapp/src/App.tsx`, `webapp/src/components/*`, `webapp/src/lib/api/*` | Routes, mobile, dark theme, i18n, React Query refresh, background preload. |
+| Copy and language | `webapp/src/lib/i18n/*` | Every locale must be complete; run `npm run i18n:validate`. |
 
-如果一个改动跨了持久数据、官方客户端响应或备份恢复，不要只改一层。NodeWarden 的很多 bug 都不是单文件问题，而是“保存了、同步没出”“同步出了、备份没带”“前端能用、官方客户端不认”。
+If a change crosses persistent data, official-client responses, or backup restore, do not patch only one layer. Many NodeWarden bugs are of the form “saved but not synced”, “synced but not backed up”, or “works in the Web Vault but not in official clients”.
 
-## 一次用户操作会怎么流动
+## How one user operation flows
 
-典型登录后操作的路径是：
+A typical authenticated Web Vault operation flows through:
 
 ```text
-前端组件
+frontend component
   -> webapp/src/lib/api/*
   -> src/router.ts
-  -> src/router-authenticated.ts 或 router-admin*.ts
+  -> src/router-authenticated.ts or router-admin*.ts
   -> src/handlers/*
   -> src/services/*
   -> D1 / R2 / KV / Durable Object
   -> response
-  -> React Query invalidate/refetch 或本地状态更新
+  -> React Query invalidate/refetch or local state update
 ```
 
-官方客户端不会走网页端组件，但会走相同的 Worker API。只在 `webapp/` 里修通，不代表官方客户端修通；只在 handler 里返回字段，不代表网页端解密、缓存和移动端状态已经跟上。
+Official clients do not use Web Vault components, but they hit the same Worker APIs. Fixing only `webapp/` does not prove official clients work. Returning a field from a handler does not prove frontend decryption, caching, and mobile state are correct.
 
-## 持久数据改动要看什么
+## Persistent data checklist
 
-新增或改变持久数据时，按这个顺序查：
+When adding or changing persistent data, check in this order:
 
-1. `migrations/0001_init.sql` 是否需要新增表、列或索引。
-2. `src/services/storage-schema.ts` 是否同步写了幂等 SQL。
-3. `src/services/storage.ts` 的 `STORAGE_SCHEMA_VERSION` 是否 bump。
-4. `src/services/storage-*-repo.ts` 是否负责读写这个字段。
-5. `src/services/backup-archive.ts` 是否导出。
-6. `src/services/backup-import.ts` 是否导入、校验、shadow 表恢复。
-7. `shared/backup-schema.ts` 或前端备份类型是否需要更新。
-8. `/api/sync` 或前端 query 是否需要带出。
-9. 是否需要写审计日志，或避免进入实例备份。
+1. Does `migrations/0001_init.sql` need a table, column, or index?
+2. Does `src/services/storage-schema.ts` include matching idempotent SQL?
+3. Did `STORAGE_SCHEMA_VERSION` in `src/services/storage.ts` get bumped?
+4. Does a `src/services/storage-*-repo.ts` file own reading and writing it?
+5. Should `src/services/backup-archive.ts` export it?
+6. Should `src/services/backup-import.ts` import it, validate it, and restore it through shadow tables?
+7. Do `shared/backup-schema.ts` or frontend backup types need updates?
+8. Should `/api/sync` or a frontend query include it?
+9. Should an audit log be written, or should the data be deliberately excluded from instance backups?
 
-运行态数据默认不进备份。例如 refresh token、设备会话、登录失败限流、一次性下载 token、备份运行锁和审计日志都不应该被当作可迁移数据。
+Runtime data does not enter backups by default. Refresh tokens, device sessions, login failure limits, one-time download tokens, backup run locks, and audit logs are not migratable vault data.
 
-## 自动化会改哪些文件
+## Automation boundaries
 
-| 自动化 | 触发方式 | 会改什么 | 不应该改什么 |
+| Automation | Trigger | Changes | Should not change |
 | --- | --- | --- | --- |
-| `Sync upstream` | 每日计划或手动输入 commit/tag | 同步 fork 的 `main` 到上游 release 或指定提交。手动模式可能 force push。 | 不应该让上游覆盖 `.github/workflows/sync-upstream.yml`。 |
-| `Sync Bitwarden global domains` | 每周计划或手动输入 `bitwarden_ref` | `src/static/global_domains.bitwarden.json`、`src/static/global_domains.bitwarden.meta.json`。 | `src/static/global_domains.custom.json`。 |
-| `Security Scan` | push、PR、手动 | 生成安全扫描报告和 artifacts。 | 不改业务代码。 |
-| `npm run build` | 本地或部署 | 生成 `dist/` 前端静态资源。 | 不代表 D1 schema 已在远端实例执行。 |
-| `cd wiki && npm run build` | 本地文档验证 | 生成 VitePress 构建产物。 | 不代表业务前端构建通过。 |
+| `Sync upstream` | Daily schedule or manual commit/tag | Syncs fork `main` to upstream release or target commit. Manual mode may force-push. | Should not let upstream overwrite `.github/workflows/sync-upstream.yml`. |
+| `Sync Bitwarden global domains` | Weekly schedule or manual `bitwarden_ref` | `src/static/global_domains.bitwarden.json`, `src/static/global_domains.bitwarden.meta.json`. | `src/static/global_domains.custom.json`. |
+| `Security Scan` | push, PR, manual | Generates scan reports and artifacts. | Does not edit business code. |
+| `npm run build` | Local or deployment | Generates `dist/` frontend assets. | Does not prove D1 schema has executed on a remote instance. |
+| `cd wiki && npm run build` | Local documentation verification | Generates VitePress output. | Does not prove the main app build passes. |
 
-贡献者提交 PR 时要分清楚：生成文件由 Action 更新，项目自定义文件由人工 PR 更新，用户个人设置由 D1 保存。
+Contributor PRs should distinguish generated files, project-owned files, and user data stored in D1.
 
-## 改后应该跑什么
+## What to run after changes
 
-| 改动 | 建议检查 |
+| Change | Suggested checks |
 | --- | --- |
-| 后端、共享类型、schema | `npx tsc -p tsconfig.json --noEmit`，`npm run build`。 |
-| 前端组件、路由、样式 | `npx tsc -p webapp/tsconfig.json --noEmit`，`npm run build`，至少检查桌面和移动端。 |
-| i18n | `npm run i18n:validate`，再 `npm run build`。 |
-| wiki | `cd wiki` 后运行 `npm run build`。 |
-| 备份恢复 | 本地导出、远程备份、hash 校验、fresh instance 和 replace existing 分支都要想清楚。 |
-| 官方客户端兼容 | 看 `/identity/connect/token`、`/api/sync`、附件/Send direct upload 响应 shape。 |
+| Backend, shared types, schema | `npx tsc -p tsconfig.json --noEmit`, `npm run build`. |
+| Frontend components, routes, styles | `npx tsc -p webapp/tsconfig.json --noEmit`, `npm run build`, and desktop/mobile inspection. |
+| i18n | `npm run i18n:validate`, then `npm run build`. |
+| wiki | Run `npm run build` inside `wiki`. |
+| Backup restore | Think through local export, remote backup, hash verification, fresh instance, and replace-existing branches. |
+| Official-client compatibility | Check `/identity/connect/token`, `/api/sync`, and attachment/Send direct upload response shapes. |
 
-检查命令不是越多越好。关键是让命令覆盖这次改动真正影响的契约。
+Run the checks that cover the contract changed by the patch.
 
-## 写 wiki 时应该写到什么程度
+## What good wiki pages should explain
 
-好的 NodeWarden wiki 页应该回答这些问题：
+A good NodeWarden wiki page should answer:
 
-- 用户在哪里操作。
-- 请求会打到哪个 API。
-- 哪些 handler 和 service 负责处理。
-- 数据写进 D1、R2/KV、Durable Object 还是静态文件。
-- 是否更新 revision date、`securityStamp`、refresh token、审计日志或备份 runtime。
-- 贡献者要改哪个文件，哪些文件是生成的。
-- GitHub Action 或脚本会自动改哪些文件。
-- 失败时用户会看到什么，维护者应该查哪里。
+- Where users operate the feature.
+- Which API requests are made.
+- Which handlers and services own the behavior.
+- Whether data is stored in D1, R2/KV, Durable Object, or static files.
+- Whether revision date, `securityStamp`, refresh tokens, audit logs, or backup runtime state change.
+- Which files contributors should change and which files are generated.
+- Which GitHub Actions or scripts update files automatically.
+- What users see on failure and where maintainers should debug.
 
-只写“支持某功能”不够。NodeWarden 的 wiki 应该让人知道这个功能为什么这样设计，以及改它时哪里会一起动。
+Writing “feature supported” is not enough. The wiki should explain why the feature is designed this way and what moves together when it changes.

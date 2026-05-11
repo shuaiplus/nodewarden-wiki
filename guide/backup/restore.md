@@ -1,94 +1,93 @@
-# 还原与校验
+# Restore and Validation
 
-还原流程的核心目标是：先验证，再替换，附件失败不污染数据库。
+The restore flow has one core goal: validate first, replace second, and never let attachment failures pollute the database.
 
-## 支持的还原来源
+## Supported restore sources
 
-- 本地上传备份 ZIP。
-- 从远程 WebDAV/S3 目标选择 ZIP 还原。
+- Upload a local backup ZIP.
+- Select a ZIP from a remote WebDAV or S3 target.
 
-远程还原可以在备份中心浏览远程目录，只允许选择 `.zip` 文件。服务端会拒绝空路径、目录路径和非 ZIP 路径。
+Remote restore can browse remote directories in the backup center. Only `.zip` files can be selected. The server rejects empty paths, directory paths, and non-ZIP paths.
 
-## 文件名 hash 校验
+## File name hash verification
 
-备份文件名形如：
+Backup file names look like:
 
 ```text
 nodewarden_backup_20260510_031500_abc12.zip
 ```
 
-末尾 5 位是 ZIP 内容 SHA-256 的前 5 位。导入时服务端会重新计算，如果不一致，默认拒绝。
+The last 5 characters are the first 5 characters of the ZIP SHA-256. During import, the server recalculates the hash and rejects by default if it does not match.
 
-管理员可以选择允许 hash 不匹配，但这会被写入审计日志里的 `checksumMismatchAccepted`。
+Administrators can choose to allow a hash mismatch, but the decision is written to the audit log as `checksumMismatchAccepted`.
 
-## 解析 ZIP
+## ZIP parsing
 
-`parseBackupArchive()` 会检查：
+`parseBackupArchive()` checks:
 
-- ZIP 总大小不能超过当前限制。
-- 解压后总大小不能超过当前限制。
-- entry 数量不能过多。
-- 必须存在 `manifest.json` 和 `db.json`。
-- manifest formatVersion 必须支持。
-- `db.json` 必须是有效 JSON。
-- 如果附件是内联 ZIP 模式，必须包含每个附件文件。
+- ZIP total size must not exceed the current limit.
+- Unzipped total size must not exceed the current limit.
+- Entry count must not be too high.
+- `manifest.json` and `db.json` must exist.
+- Manifest `formatVersion` must be supported.
+- `db.json` must be valid JSON.
+- If attachments are inline in the ZIP, every required attachment file must exist.
 
-## 内容校验
+## Content validation
 
-`validateBackupPayloadContents()` 会检查：
+`validateBackupPayloadContents()` checks:
 
-- users 必须有 id 和 email。
-- 用户 id 不能重复。
-- config key 不能为空。
-- revision 必须指向存在的用户。
-- domain_settings 必须指向存在的用户，且每个用户最多一条。
-- folders 必须指向存在的用户，folder id 不能重复。
-- ciphers 必须指向存在的用户。
-- cipher 的 folder_id 必须存在。
-- attachments 必须指向存在的 cipher。
-- 每个附件必须有对应文件或远程 blob 引用。
+- Users must have `id` and `email`.
+- User IDs must be unique.
+- Config keys cannot be empty.
+- Revisions must point to existing users.
+- Domain settings must point to existing users, and each user can have at most one row.
+- Folders must point to existing users, and folder IDs must be unique.
+- Ciphers must point to existing users.
+- Cipher `folder_id` must exist when present.
+- Attachments must point to existing ciphers.
+- Each attachment must have a corresponding file or remote blob reference.
 
-## fresh instance 保护
+## Fresh instance protection
 
-默认还原要求目标实例没有 vault 或 send 数据。服务端会检查：
+By default, restore requires the target instance to have no vault or Send data. The server checks:
 
 - `ciphers`
 - `folders`
 - `attachments`
 - `sends`
 
-如果已有数据且没有选择 replace existing，会返回冲突。
+If data already exists and replace-existing is not selected, restore returns a conflict.
 
-## shadow 表还原
+## Shadow table restore
 
-还原不是直接 `DELETE` 正式表再插入。流程是：
+Restore does not directly delete official tables and insert backup rows. The flow is:
 
-1. 删除旧 shadow 表。
-2. 从当前正式表 CREATE SQL 生成 shadow 表。
-3. 把备份行插入 shadow 表。
-4. 校验 shadow 表行数。
-5. 恢复附件 blob。
-6. 对恢复失败的附件，从 shadow 表删除对应行。
-7. 再次校验 shadow 表行数。
-8. 清空正式表。
-9. 把 shadow 表内容插入正式表。
-10. 删除 shadow 表。
+1. Delete old shadow tables.
+2. Create shadow tables from the current official table `CREATE SQL`.
+3. Insert backup rows into shadow tables.
+4. Validate shadow table row counts.
+5. Restore attachment blobs.
+6. Remove rows for attachments that failed to restore from the shadow table.
+7. Validate shadow table row counts again.
+8. Clear official tables.
+9. Insert shadow table contents into official tables.
+10. Delete shadow tables.
 
-这样如果中途失败，正式数据不会在前半段就被清掉。
+If restore fails before the replacement phase, official data has not been cleared.
 
-## 附件恢复策略
+## Attachment recovery policy
 
-附件恢复会根据目标存储做适配：
+Attachment recovery adapts to the target storage:
 
-- R2：直接写入。
-- KV：超过 25 MiB 的附件跳过。
-- 未配置附件存储：所有附件跳过。
+- R2: write directly.
+- KV: skip attachments larger than 25 MiB.
+- No attachment storage: skip all attachments.
 
-跳过附件时，服务端会返回 skipped 列表，并从恢复后的 attachments 表里移除这些行，避免前端看到不存在的附件。
+When attachments are skipped, the server returns a skipped list and removes those rows from the restored `attachments` table so the frontend does not show non-existent files.
 
-## 替换恢复后的清理
+## Cleanup after replace restore
 
-如果选择 replace existing，恢复成功后会比较恢复前后的附件 blob key。旧库里不再被引用的 blob 会被清理，避免存储里堆积孤儿文件。
+If replace-existing is selected, after restore succeeds NodeWarden compares attachment blob keys before and after restore. Blobs from the old vault that are no longer referenced are cleaned up to avoid orphan storage.
 
-清理失败不会回滚数据库恢复，但会尽力执行。
-
+Cleanup failure does not roll back database restore, but NodeWarden still attempts it.

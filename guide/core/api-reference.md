@@ -1,123 +1,123 @@
-# API 参考
+# API Reference
 
-本页汇总当前主要 HTTP 接口，方便排查客户端兼容、前端调用和反向代理问题。完整行为仍以 `src/router*.ts` 与对应 handler 为准。
+This page summarizes the main HTTP APIs for debugging client compatibility, frontend calls, and reverse proxy issues. Exact behavior still follows `src/router*.ts` and the corresponding handlers.
 
-## 公开接口
+## Public APIs
 
-公开接口不要求 Bearer token，但敏感路径仍会走限流、same-origin 检查或一次性 token 校验。
+Public APIs do not require a Bearer token, but sensitive paths still use rate limits, same-origin checks, or one-time token validation.
 
-| 方法 | 路径 | 用途 |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/web-bootstrap`, `/web-bootstrap` | 网页端启动配置和风险提示。 |
-| `GET` | `/config`, `/api/config`, `/api/version` | Bitwarden 兼容配置和版本。 |
-| `POST` | `/identity/accounts/prelogin`, `/identity/accounts/prelogin/password` | 登录前读取 KDF 参数。 |
-| `POST` | `/identity/connect/token` | 密码、refresh token、API Key 登录，也承载 Send V2 的 `send_access` grant。 |
-| `POST` | `/identity/connect/revocation`, `/identity/connect/revoke` | 撤销 refresh token。 |
-| `POST` | `/api/accounts/register` | 首次注册或邀请码注册。 |
-| `POST` | `/api/accounts/password-hint` | 同源密码提示查询。 |
-| `POST` | `/identity/accounts/recover-2fa`, `/api/accounts/recover-2fa` | 使用恢复码关闭 TOTP。 |
-| `GET` | `/api/devices/knowndevice` | 官方客户端已知设备检查。 |
-| `PUT`, `POST` | `/api/devices/identifier/{id}/clear-token` | 登录前设备 token 清理兼容路径，返回空 200。 |
-| `GET` | `/icons/{hostname}/icon.png` | 网站图标代理，细节见 [网站图标](/guide/core/website-icons)。 |
-| `POST`, `GET` | `/notifications/hub/negotiate`, `/notifications/hub` | 通知 negotiate 和 WebSocket。 |
+| `GET` | `/api/web-bootstrap`, `/web-bootstrap` | Web Vault startup config and risk warnings. |
+| `GET` | `/config`, `/api/config`, `/api/version` | Bitwarden-compatible config and version. |
+| `POST` | `/identity/accounts/prelogin`, `/identity/accounts/prelogin/password` | Read KDF parameters before login. |
+| `POST` | `/identity/connect/token` | Password, refresh token, and API key login; also carries the Send V2 `send_access` grant. |
+| `POST` | `/identity/connect/revocation`, `/identity/connect/revoke` | Revoke refresh tokens. |
+| `POST` | `/api/accounts/register` | First registration or invite registration. |
+| `POST` | `/api/accounts/password-hint` | Same-origin password hint lookup. |
+| `POST` | `/identity/accounts/recover-2fa`, `/api/accounts/recover-2fa` | Disable TOTP with a recovery code. |
+| `GET` | `/api/devices/knowndevice` | Official-client known-device check. |
+| `PUT`, `POST` | `/api/devices/identifier/{id}/clear-token` | Login-preflight compatible clear-token path; returns empty 200. |
+| `GET` | `/icons/{hostname}/icon.png` | Website icon proxy. See [Website Icons](/guide/core/website-icons). |
+| `POST`, `GET` | `/notifications/hub/negotiate`, `/notifications/hub` | Notification negotiate and WebSocket. |
 
-## 账号与认证
+## Accounts and authentication
 
-| 方法 | 路径 | 用途 |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `GET`, `PUT` | `/api/accounts/profile` | 获取或更新个人资料。 |
-| `POST`, `PUT` | `/api/accounts/password`, `/api/accounts/change-password` | 修改主密码并刷新 `securityStamp`。 |
-| `POST` | `/api/accounts/keys` | 保存账号密钥材料。 |
-| `GET`, `PUT`, `POST` | `/api/accounts/totp` | 获取或修改用户级 TOTP 状态。 |
-| `POST` | `/api/accounts/totp/recovery-code`, `/api/two-factor/get-recover` | 获取或轮换 TOTP 恢复码。 |
-| `GET` | `/api/accounts/revision-date` | 返回账号修订时间。 |
-| `POST` | `/api/accounts/verify-password` | 校验主密码 hash。 |
-| `PUT`, `POST` | `/api/accounts/verify-devices` | 开关设备验证。 |
-| `POST` | `/api/accounts/api-key`, `/api/accounts/api_key` | 查看或创建个人 API Key。 |
-| `POST` | `/api/accounts/rotate-api-key`, `/api/accounts/rotate_api_key` | 轮换个人 API Key，并清理旧 refresh token。 |
+| `GET`, `PUT` | `/api/accounts/profile` | Get or update profile. |
+| `POST`, `PUT` | `/api/accounts/password`, `/api/accounts/change-password` | Change master password and refresh `securityStamp`. |
+| `POST` | `/api/accounts/keys` | Save account key material. |
+| `GET`, `PUT`, `POST` | `/api/accounts/totp` | Get or change user-level TOTP status. |
+| `POST` | `/api/accounts/totp/recovery-code`, `/api/two-factor/get-recover` | Get or rotate TOTP recovery code. |
+| `GET` | `/api/accounts/revision-date` | Return account revision date. |
+| `POST` | `/api/accounts/verify-password` | Verify master password hash. |
+| `PUT`, `POST` | `/api/accounts/verify-devices` | Toggle device verification. |
+| `POST` | `/api/accounts/api-key`, `/api/accounts/api_key` | View or create personal API key. |
+| `POST` | `/api/accounts/rotate-api-key`, `/api/accounts/rotate_api_key` | Rotate personal API key and clear old refresh tokens. |
 
-## 密码库
+## Vault
 
-| 方法 | 路径 | 用途 |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/sync` | 官方客户端全量同步入口。 |
-| `GET`, `POST` | `/api/ciphers`, `/api/ciphers/create` | 获取或创建密码项。 |
-| `GET`, `PUT`, `POST`, `DELETE` | `/api/ciphers/{id}` | 获取、更新或删除密码项。 |
-| `PUT` | `/api/ciphers/{id}/delete` | 软删除到回收站。 |
-| `DELETE` | `/api/ciphers/{id}/delete` | 永久删除。 |
-| `PUT` | `/api/ciphers/{id}/restore` | 从回收站恢复。 |
-| `PUT`, `POST` | `/api/ciphers/{id}/archive`, `/api/ciphers/{id}/unarchive` | 归档或取消归档。 |
-| `PUT`, `POST` | `/api/ciphers/{id}/partial` | 局部更新。 |
-| `POST`, `PUT` | `/api/ciphers/move` | 批量移动到文件夹。 |
-| `POST` | `/api/ciphers/delete`, `/api/ciphers/delete-permanent`, `/api/ciphers/restore` | 批量软删、永久删除或恢复。 |
-| `PUT`, `POST` | `/api/ciphers/archive`, `/api/ciphers/unarchive` | 批量归档或取消归档。 |
-| `POST` | `/api/ciphers/import` | 导入密码库数据。 |
-| `GET`, `POST` | `/api/folders` | 获取或创建文件夹。 |
-| `GET`, `PUT`, `DELETE` | `/api/folders/{id}` | 获取、更新或删除文件夹。 |
-| `POST` | `/api/folders/delete` | 批量删除文件夹。 |
+| `GET` | `/api/sync` | Official-client full sync entrypoint. |
+| `GET`, `POST` | `/api/ciphers`, `/api/ciphers/create` | Get or create ciphers. |
+| `GET`, `PUT`, `POST`, `DELETE` | `/api/ciphers/{id}` | Get, update, or delete a cipher. |
+| `PUT` | `/api/ciphers/{id}/delete` | Soft delete to trash. |
+| `DELETE` | `/api/ciphers/{id}/delete` | Permanently delete. |
+| `PUT` | `/api/ciphers/{id}/restore` | Restore from trash. |
+| `PUT`, `POST` | `/api/ciphers/{id}/archive`, `/api/ciphers/{id}/unarchive` | Archive or unarchive. |
+| `PUT`, `POST` | `/api/ciphers/{id}/partial` | Partial update. |
+| `POST`, `PUT` | `/api/ciphers/move` | Bulk move to folder. |
+| `POST` | `/api/ciphers/delete`, `/api/ciphers/delete-permanent`, `/api/ciphers/restore` | Bulk soft delete, permanent delete, or restore. |
+| `PUT`, `POST` | `/api/ciphers/archive`, `/api/ciphers/unarchive` | Bulk archive or unarchive. |
+| `POST` | `/api/ciphers/import` | Import vault data. |
+| `GET`, `POST` | `/api/folders` | Get or create folders. |
+| `GET`, `PUT`, `DELETE` | `/api/folders/{id}` | Get, update, or delete folder. |
+| `POST` | `/api/folders/delete` | Bulk delete folders. |
 
-## 附件与 Send
+## Attachments and Send
 
-| 方法 | 路径 | 用途 |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `POST` | `/api/ciphers/{id}/attachment/v2`, `/api/ciphers/{id}/attachment` | 创建附件元数据与上传 token。 |
-| `GET`, `POST`, `PUT`, `DELETE` | `/api/ciphers/{id}/attachment/{attachmentId}` | 下载、上传或删除附件。 |
-| `POST`, `PUT` | `/api/ciphers/{id}/attachment/{attachmentId}/metadata` | 更新附件元数据。 |
-| `POST` | `/api/ciphers/{id}/attachment/{attachmentId}/delete` | 删除附件兼容路径。 |
-| `GET` | `/api/attachments/{cipherId}/{attachmentId}?token=...` | token 化公开下载附件。 |
-| `POST`, `PUT` | `/api/ciphers/{id}/attachment/{attachmentId}?token=...` | token 化公开上传附件。 |
-| `GET`, `POST` | `/api/sends` | 获取或创建 Send。 |
-| `GET`, `PUT`, `DELETE` | `/api/sends/{id}` | 获取、更新或删除 Send。 |
-| `POST` | `/api/sends/file/v2` | 创建文件 Send 元数据与上传 token。 |
-| `GET`, `POST`, `PUT` | `/api/sends/{id}/file/{fileId}` | 获取上传地址或上传 Send 文件。 |
-| `POST`, `PUT` | `/api/sends/{id}/file/{fileId}?token=...` | token 化公开上传 Send 文件。 |
-| `PUT`, `POST` | `/api/sends/{id}/remove-password`, `/api/sends/{id}/remove-auth` | 移除 Send 密码或访问认证。 |
-| `POST` | `/api/sends/delete` | 批量删除 Send。 |
-| `POST` | `/api/sends/access`, `/api/sends/access/{id}` | 公开访问 Send。 |
-| `POST` | `/api/sends/access/file/{id}`, `/api/sends/{id}/access/file/{fileId}` | 公开访问文件 Send。 |
-| `GET` | `/api/sends/{id}/{fileId}` | 公开下载文件 Send。 |
+| `POST` | `/api/ciphers/{id}/attachment/v2`, `/api/ciphers/{id}/attachment` | Create attachment metadata and upload token. |
+| `GET`, `POST`, `PUT`, `DELETE` | `/api/ciphers/{id}/attachment/{attachmentId}` | Download, upload, or delete attachment. |
+| `POST`, `PUT` | `/api/ciphers/{id}/attachment/{attachmentId}/metadata` | Update attachment metadata. |
+| `POST` | `/api/ciphers/{id}/attachment/{attachmentId}/delete` | Compatible delete path. |
+| `GET` | `/api/attachments/{cipherId}/{attachmentId}?token=...` | Tokenized public attachment download. |
+| `POST`, `PUT` | `/api/ciphers/{id}/attachment/{attachmentId}?token=...` | Tokenized public attachment upload. |
+| `GET`, `POST` | `/api/sends` | Get or create Send. |
+| `GET`, `PUT`, `DELETE` | `/api/sends/{id}` | Get, update, or delete Send. |
+| `POST` | `/api/sends/file/v2` | Create file Send metadata and upload token. |
+| `GET`, `POST`, `PUT` | `/api/sends/{id}/file/{fileId}` | Get upload URL or upload Send file. |
+| `POST`, `PUT` | `/api/sends/{id}/file/{fileId}?token=...` | Tokenized public Send file upload. |
+| `PUT`, `POST` | `/api/sends/{id}/remove-password`, `/api/sends/{id}/remove-auth` | Remove Send password or access auth. |
+| `POST` | `/api/sends/delete` | Bulk delete Send. |
+| `POST` | `/api/sends/access`, `/api/sends/access/{id}` | Public Send access. |
+| `POST` | `/api/sends/access/file/{id}`, `/api/sends/{id}/access/file/{fileId}` | Public file Send access. |
+| `GET` | `/api/sends/{id}/{fileId}` | Public file Send download. |
 
-## 域名规则与设备
+## Domain rules and devices
 
-| 方法 | 路径 | 用途 |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `GET`, `PUT`, `POST` | `/api/settings/domains`, `/settings/domains` | 获取或保存用户域名匹配规则。 |
-| `GET`, `DELETE` | `/api/devices` | 获取设备列表或删除当前用户全部设备。 |
-| `GET`, `DELETE` | `/api/devices/authorized` | 获取或清空已记住的 2FA 设备。 |
-| `DELETE` | `/api/devices/authorized/{id}` | 撤销单个已记住设备。 |
-| `GET`, `DELETE` | `/api/devices/{id}` | 获取或删除单个设备。 |
-| `PUT` | `/api/devices/{id}/name` | 更新设备显示名。 |
-| `GET` | `/api/devices/identifier/{id}` | 按 device identifier 查询设备。 |
-| `PUT`, `POST` | `/api/devices/{id}/keys`, `/api/devices/identifier/{id}/keys` | 更新设备加密 key。 |
-| `PUT`, `POST` | `/api/devices/identifier/{id}/token` | 更新设备 push token。 |
-| `PUT`, `POST` | `/api/devices/identifier/{id}/web-push-auth` | 更新 Web Push 认证信息。 |
-| `PUT`, `POST` | `/api/devices/identifier/{id}/clear-token` | 清理设备 token。 |
-| `POST` | `/api/devices/{id}/retrieve-keys` | 获取设备密钥材料兼容接口。 |
-| `POST`, `DELETE` | `/api/devices/{id}/deactivate` | 停用设备。 |
-| `POST` | `/api/devices/update-trust`, `/api/devices/untrust` | 更新或撤销设备信任状态。 |
+| `GET`, `PUT`, `POST` | `/api/settings/domains`, `/settings/domains` | Get or save user domain match rules. |
+| `GET`, `DELETE` | `/api/devices` | List devices or delete all current-user devices. |
+| `GET`, `DELETE` | `/api/devices/authorized` | List or clear remembered 2FA devices. |
+| `DELETE` | `/api/devices/authorized/{id}` | Revoke one remembered device. |
+| `GET`, `DELETE` | `/api/devices/{id}` | Get or delete one device. |
+| `PUT` | `/api/devices/{id}/name` | Update device display name. |
+| `GET` | `/api/devices/identifier/{id}` | Query by device identifier. |
+| `PUT`, `POST` | `/api/devices/{id}/keys`, `/api/devices/identifier/{id}/keys` | Update device encryption key. |
+| `PUT`, `POST` | `/api/devices/identifier/{id}/token` | Update device push token. |
+| `PUT`, `POST` | `/api/devices/identifier/{id}/web-push-auth` | Update Web Push auth data. |
+| `PUT`, `POST` | `/api/devices/identifier/{id}/clear-token` | Clear device token. |
+| `POST` | `/api/devices/{id}/retrieve-keys` | Compatible device key retrieval path. |
+| `POST`, `DELETE` | `/api/devices/{id}/deactivate` | Deactivate device. |
+| `POST` | `/api/devices/update-trust`, `/api/devices/untrust` | Update or revoke device trust. |
 
-## 管理员接口
+## Administrator APIs
 
-管理员接口要求当前用户是 admin。
+Administrator APIs require the current user to be an admin.
 
-| 方法 | 路径 | 用途 |
+| Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/admin/users` | 用户列表。 |
-| `GET`, `POST`, `DELETE` | `/api/admin/invites` | 获取、创建或清空邀请码。 |
-| `DELETE` | `/api/admin/invites/{code}` | 撤销单个邀请码。 |
-| `PUT`, `POST` | `/api/admin/users/{id}/status` | 启用或封禁用户。 |
-| `DELETE` | `/api/admin/users/{id}` | 删除用户并清理关联附件和 Send 文件。 |
-| `POST` | `/api/admin/backup/export`, `/api/admin/backup/import` | 导出或导入实例备份。 |
-| `GET` | `/api/admin/backup/blob` | 本地完整导出时下载附件 blob，供前端重新打包 ZIP。 |
-| `GET`, `PUT` | `/api/admin/backup/settings` | 获取或保存备份中心设置。 |
-| `GET`, `POST` | `/api/admin/backup/settings/repair` | 检查或修复备份设置加密状态。 |
-| `POST` | `/api/admin/backup/run` | 立即执行远程备份。 |
-| `GET` | `/api/admin/backup/remote` | 浏览远程备份列表。 |
-| `GET` | `/api/admin/backup/remote/download` | 下载远程备份。 |
-| `GET` | `/api/admin/backup/remote/integrity` | 检查远程备份完整性。 |
-| `DELETE` | `/api/admin/backup/remote/file` | 删除远程备份文件。 |
-| `POST` | `/api/admin/backup/remote/restore` | 从远程备份还原。 |
+| `GET` | `/api/admin/users` | User list. |
+| `GET`, `POST`, `DELETE` | `/api/admin/invites` | List, create, or clear invites. |
+| `DELETE` | `/api/admin/invites/{code}` | Revoke one invite. |
+| `PUT`, `POST` | `/api/admin/users/{id}/status` | Enable or ban a user. |
+| `DELETE` | `/api/admin/users/{id}` | Delete user and associated attachments and Send files. |
+| `POST` | `/api/admin/backup/export`, `/api/admin/backup/import` | Export or import instance backup. |
+| `GET` | `/api/admin/backup/blob` | Download attachment blobs during full local export so the frontend can repackage ZIP. |
+| `GET`, `PUT` | `/api/admin/backup/settings` | Get or save backup center settings. |
+| `GET`, `POST` | `/api/admin/backup/settings/repair` | Check or repair backup settings encryption status. |
+| `POST` | `/api/admin/backup/run` | Run remote backup immediately. |
+| `GET` | `/api/admin/backup/remote` | Browse remote backup list. |
+| `GET` | `/api/admin/backup/remote/download` | Download remote backup. |
+| `GET` | `/api/admin/backup/remote/integrity` | Check remote backup integrity. |
+| `DELETE` | `/api/admin/backup/remote/file` | Delete remote backup file. |
+| `POST` | `/api/admin/backup/remote/restore` | Restore from remote backup. |
 
-## 兼容占位
+## Compatibility placeholders
 
-NodeWarden 没有实现完整组织、集合和企业策略模型。`/api/collections`、`/api/organizations`、`/api/policies`、`/api/auth-requests` 在读取场景下会返回空列表或空结构，只用于保证个人密码库工作流继续运行。
+NodeWarden does not implement the full organization, collection, and enterprise policy model. Read paths such as `/api/collections`, `/api/organizations`, `/api/policies`, and `/api/auth-requests` return empty lists or empty structures so personal vault workflows can continue.

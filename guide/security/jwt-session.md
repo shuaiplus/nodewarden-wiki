@@ -1,12 +1,12 @@
-# JWT 与会话
+# JWT and Sessions
 
-JWT_SECRET 是 NodeWarden 最关键的部署密钥之一。它不只签登录 token，还影响附件、Send 和备份配置。
+`JWT_SECRET` is one of NodeWarden's most important deployment secrets. It does more than sign login tokens; it also affects attachments, Send, and backup settings.
 
-## access token
+## Access token
 
-登录成功后，服务端签发 HS256 JWT，默认 7200 秒有效。payload 包含：
+After login succeeds, the server signs an HS256 JWT that is valid for 7200 seconds by default. The payload includes:
 
-- `sub`：用户 id
+- `sub`: user ID
 - `email`
 - `name`
 - `email_verified`
@@ -19,48 +19,48 @@ JWT_SECRET 是 NodeWarden 最关键的部署密钥之一。它不只签登录 to
 - `iss`
 - `premium`
 
-`email_verified`、`amr`、`premium` 等字段是为了兼容官方客户端。
+Fields such as `email_verified`, `amr`, and `premium` are included for official-client compatibility.
 
-## refresh token
+## Refresh token
 
-refresh token 是随机 32 字节生成的 base64url 字符串。数据库里不是保存明文 token，而是保存：
+Refresh tokens are random 32-byte base64url strings. The database does not store plaintext tokens. It stores:
 
 ```text
 sha256:<digest>
 ```
 
-刷新 token 时，旧 refresh token 会被缩短到一个短重叠窗口，用来吸收浏览器扩展 popup/background 同时刷新的竞态。
+When a token is refreshed, the old refresh token is shortened into a small overlap window. This absorbs races where a browser extension popup and background process refresh at the same time.
 
-网页端使用 `X-NodeWarden-Web-Session: 1` 登录后，refresh token 会写入 `nodewarden_web_refresh` HttpOnly cookie。网页本地存储不应该保存 refresh token 明文；官方客户端和浏览器扩展仍按自身协议保存并提交 refresh token。
+When the Web Vault logs in with `X-NodeWarden-Web-Session: 1`, the refresh token is stored in the `nodewarden_web_refresh` HttpOnly cookie. Web local storage should not contain plaintext refresh tokens. Official clients and browser extensions still store and submit refresh tokens according to their own protocol.
 
-## 设备绑定
+## Device binding
 
-如果客户端提交 device identifier，服务端会创建或更新设备记录，并把：
+If a client submits a device identifier, the server creates or updates a device record and writes these fields into the access token:
 
 - `did`
 - `dstamp`
 
-写入 access token。验证 token 时会检查设备是否存在，以及 token 里的 device session stamp 是否等于当前设备记录。
+During token verification, the server checks whether the device exists and whether the token's device session stamp matches the current device record.
 
-这意味着删除设备或更新设备 session stamp，可以让该设备旧 token 失效。
+This means deleting a device or changing its session stamp can invalidate that device's old tokens.
 
-## 附件和 Send 短 token
+## Attachment and Send short tokens
 
-附件下载 token 默认 5 分钟有效，并带有 `jti`。服务端会记录已消费的 jti，防止同一个下载链接反复使用。
+Attachment download tokens are valid for 5 minutes by default and include `jti`. The server records consumed `jti` values to prevent the same download link from being reused.
 
-附件上传、Send 文件上传、Send 文件下载也都有独立短 token。公开 Send V2 访问会先换取 `send_access` token，再用它访问文件内容。它们都使用 JWT_SECRET 签名。
+Attachment upload, Send file upload, and Send file download also use independent short tokens. Public Send V2 access first obtains a `send_access` token, then uses it to read file content. All of these tokens are signed with `JWT_SECRET`.
 
-## JWT_SECRET 变更影响
+## Impact of changing `JWT_SECRET`
 
-JWT_SECRET 变化后：
+If `JWT_SECRET` changes:
 
-- 所有 access token 无法验证。
-- 附件短 token 无法验证。
-- Send 短 token 无法验证。
-- 备份配置 runtime 加密无法解密。
+- All access tokens fail verification.
+- Attachment short tokens fail verification.
+- Send short tokens fail verification.
+- Backup settings runtime encryption cannot be decrypted.
 
-所以生产环境必须把 JWT_SECRET 存成 Secret，并在所有部署间保持稳定。
+Production instances must store `JWT_SECRET` as a Cloudflare Secret and keep it stable across deployments.
 
-## HMAC key 缓存
+## HMAC key cache
 
-`src/utils/jwt.ts` 会缓存由 JWT_SECRET 导入的 HMAC CryptoKey，避免每次签名/验证都重复 importKey。缓存 key 就是 secret 字符串。
+`src/utils/jwt.ts` caches the HMAC `CryptoKey` imported from `JWT_SECRET` so signing and verification do not call `importKey` every time. The cache key is the secret string.

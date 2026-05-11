@@ -1,28 +1,28 @@
-# 整体架构
+# Architecture Overview
 
-NodeWarden 是一个单 Worker 应用。前端、API、存储和定时任务都围绕 Cloudflare 绑定组织。
+NodeWarden is a single-Worker application. The frontend, APIs, storage, and scheduled tasks are organized around Cloudflare bindings.
 
-## 目录结构
+## Directory structure
 
 ```text
 src/
-  handlers/       API 业务处理
-  services/       D1、备份、存储、限流、域名规则等服务
-  utils/          JWT、响应、TOTP、UUID、设备解析等工具
-  durable/        Durable Object 通知中心
-  static/         全局域名规则静态数据
+  handlers/       API business handlers
+  services/       D1, backup, storage, rate limit, domain rules, and shared services
+  utils/          JWT, responses, TOTP, UUID, device parsing, and helpers
+  durable/        Durable Object notification hub
+  static/         Static global domain rule data
 webapp/
   src/            Preact Web Vault
 shared/
   backup-schema.ts
   app-version.ts
 migrations/
-  0001_init.sql   初始 D1 schema
+  0001_init.sql   Initial D1 schema
 wiki/
-  VitePress 文档
+  VitePress documentation
 ```
 
-## 请求生命周期
+## Request lifecycle
 
 ```text
 src/index.ts
@@ -33,20 +33,20 @@ src/index.ts
 
 src/router.ts
   CORS
-  请求大小限制
+  request size limits
   public route
-  JWT_SECRET 安全检查
-  access token 验证
-  用户状态检查
-  认证 API 限流
+  JWT_SECRET safety check
+  access token verification
+  user status check
+  authenticated API rate limit
   authenticated route
 ```
 
-公开路由包括注册、预登录、登录、公开 Send、附件短链、图标等。认证路由需要 Bearer token。
+Public routes include registration, prelogin, login, public Send, attachment short links, icons, and related endpoints. Authenticated routes require a Bearer token.
 
-## 存储层
+## Storage layer
 
-结构化数据在 D1：
+Structured data is stored in D1:
 
 - users
 - user_revisions
@@ -64,46 +64,46 @@ src/router.ts
 - login_attempts_ip
 - used_attachment_download_tokens
 
-二进制数据在 R2/KV：
+Binary data is stored in R2/KV:
 
-- 附件正文
-- Send 文件正文
+- Attachment bodies
+- Send file bodies
 
-## 通知层
+## Notification layer
 
-Durable Object `NotificationsHub` 用于网页端事件通知，例如：
+Durable Object `NotificationsHub` powers Web Vault events such as:
 
-- vault sync revision 更新。
-- 备份导出进度。
-- 备份远程运行进度。
-- 备份还原进度。
+- Vault sync revision updates.
+- Backup export progress.
+- Remote backup progress.
+- Backup restore progress.
 
-这让网页端不用靠盲等来感知长任务状态。
+This lets the Web Vault observe long-running task status without blind waiting.
 
-通知层细节见 [实时通知](/guide/architecture/realtime-notifications)。它是刷新加速和进度通道，最终数据仍以 API 和 `/api/sync` 为准。
+The notification layer is described in [Realtime Notifications](/guide/architecture/realtime-notifications). It accelerates refresh and progress reporting; final data still comes from APIs and `/api/sync`.
 
-## 前端构建
+## Frontend build
 
-`webapp/` 使用 Vite + Preact。构建脚本：
+`webapp/` uses Vite and Preact. Build command:
 
 ```powershell
 npm run build
 ```
 
-会输出到 `dist/`，由 Worker assets 服务。
+The output is written to `dist/` and served by Worker assets.
 
-Demo 模式使用：
+Demo mode uses:
 
 ```powershell
 npm run build:demo
 ```
 
-## 定时任务
+## Scheduled tasks
 
-Cloudflare cron 每 5 分钟调用 Worker scheduled handler。实际只处理备份扫描：
+Cloudflare cron calls the Worker scheduled handler every 5 minutes. It currently scans only backup schedules:
 
 ```text
 src/index.ts -> scheduled() -> runScheduledBackupIfDue()
 ```
 
-如果数据库初始化失败，定时备份会跳过并记录日志。
+If database initialization fails, scheduled backup is skipped and logged.

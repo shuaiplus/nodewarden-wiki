@@ -1,90 +1,90 @@
-# 备份能力总览
+# Backup Overview
 
-NodeWarden 的备份中心不是简单下载数据库。它把实例备份、远程存储、附件复用、备份目标密钥加密、上传校验、还原前验证和运行锁放在一套流程里。
+NodeWarden's backup center is more than a database download. It combines instance backups, remote storage, attachment reuse, encrypted backup target secrets, upload verification, pre-restore validation, and run locks into one workflow.
 
-## 两种备份
+## Two backup modes
 
-| 类型 | 入口 | 作用 |
+| Type | Entry | Purpose |
 | --- | --- | --- |
-| 本地实例导出 | 备份中心手动导出 | 下载一个 `nodewarden_backup_*.zip`，用于离线保存或手动迁移。 |
-| 远程定时备份 | WebDAV / S3 目标 | 自动上传 ZIP，并按保留策略清理旧备份。 |
+| Local instance export | Manual export in the backup center | Downloads a `nodewarden_backup_*.zip` for offline storage or manual migration. |
+| Remote scheduled backup | WebDAV / S3 target | Uploads ZIP files automatically and prunes old backups according to retention rules. |
 
-本地导出如果勾选附件，前端会在下载 ZIP 后继续拉取附件 blob，并重新打包成完整 ZIP。远程备份为了节省传输，会把附件 blob 单独放在远程 `attachments/` 目录，ZIP 里只保存引用清单。
+If a local export includes attachments, the frontend downloads the ZIP, fetches attachment blobs, and repackages a complete ZIP. Remote backups store attachment blobs separately in the remote `attachments/` directory so repeated backups do not reupload the same large files. The ZIP contains a reference manifest.
 
-## 支持的远程目标
+## Supported remote targets
 
 - WebDAV
-- S3 兼容存储
+- S3-compatible storage
 
-历史上有些界面或旧配置可能叫 E3。当前代码里统一使用 `s3`，旧的 `e3` 输入会被兼容映射为 `s3`。
+Some older UI labels or configs may have used E3. Current code uses `s3`, and old `e3` input is mapped to `s3` for compatibility.
 
-一个实例最多保存 24 个备份目标。默认计划是 UTC 时区、每天 03:00、每 24 小时执行一次、保留 30 份；每个目标可以单独设置启用状态、路径、附件选项、计划和保留份数。
+An instance can store up to 24 backup targets. The default schedule is UTC, 03:00, every 24 hours, retaining 30 backups. Each target can configure enabled state, path, attachment option, schedule, and retention independently.
 
-## 备份 ZIP 内容
+## Backup ZIP contents
 
-基础 ZIP 包含：
+The base ZIP contains:
 
 ```text
 manifest.json
 db.json
 ```
 
-如果是完整本地导出，并且包含附件，前端会补齐：
+A complete local export with attachments also contains:
 
 ```text
 attachments/<cipherId>/<attachmentId>.bin
 ```
 
-远程备份通常不会把附件正文直接塞进每个 ZIP，而是放在：
+Remote backups usually do not put attachment bodies into every ZIP. They store blobs at:
 
 ```text
 attachments/<cipherId>/<attachmentId>
 attachments/.nodewarden-attachment-index.v1.json
 ```
 
-ZIP 的 manifest 会记录每个附件 blob 名、大小和所属 cipher/attachment。
+The ZIP manifest records each attachment blob name, size, and cipher/attachment ownership.
 
-## 为什么远程附件要单独存
+## Why remote attachments are separate
 
-如果每次备份都把所有附件打进 ZIP，大密码库会反复上传同一批大文件。NodeWarden 的远程备份会维护远程附件索引：
+If every backup ZIP contained every attachment, large vaults would reupload the same files again and again. NodeWarden remote backups maintain a remote attachment index:
 
-- 本地生成 manifest，列出需要的附件 blob。
-- 读取远程 `attachments/.nodewarden-attachment-index.v1.json`。
-- 已存在且大小一致的附件不再上传。
-- 缺失或大小不同的附件才上传。
-- 最后上传新的备份 ZIP。
+- Build a local manifest listing required attachment blobs.
+- Read remote `attachments/.nodewarden-attachment-index.v1.json`.
+- Skip blobs that already exist with the same size.
+- Upload only missing or size-mismatched blobs.
+- Upload the new backup ZIP last.
 
-这样每天备份时，通常只有 `db.json` 和新增附件会变化。
+In normal daily backups, only `db.json` and new attachments change.
 
-## 上传后校验
+## Upload verification
 
-远程备份上传 ZIP 后，不是直接宣布成功。流程会：
+After uploading a remote backup ZIP, NodeWarden does not immediately mark it successful. It:
 
-1. 上传备份 ZIP。
-2. 立即从远程下载同名 ZIP。
-3. 校验文件名里的 hash 前缀是否匹配内容 SHA-256 前 5 位。
-4. 校验下载大小是否等于上传大小。
-5. 失败则删除远程 ZIP 并重试，最多 3 次。
+1. Uploads the backup ZIP.
+2. Downloads the same remote ZIP.
+3. Checks that the hash prefix in the file name matches the first 5 characters of the ZIP SHA-256.
+4. Checks that downloaded size equals uploaded size.
+5. Deletes the remote ZIP and retries on failure, up to 3 attempts.
 
-这可以发现上传过程中被远程服务截断、覆盖或返回异常内容的问题。
+This catches truncated, overwritten, or unexpected remote upload results.
 
-## 运行锁
+## Run lock
 
-备份和还原不是队列。`backup.runner.lock.v1` 是 D1 `config` 表里的租约锁，用来避免两个备份/还原任务重叠执行。
+Backup and restore operations are not queued. `backup.runner.lock.v1` is a lease lock in the D1 `config` table that prevents overlapping backup or restore tasks.
 
-- 手动运行时，如果锁被占用，会返回 409。
-- 定时运行时，如果锁被占用，会静默跳过。
-- 锁有 10 分钟租约，任务运行中会心跳续租。
-- 这条锁不会被导出到备份。
+- Manual runs return 409 if the lock is occupied.
+- Scheduled runs silently skip if the lock is occupied.
+- The lock has a 10-minute lease and is extended by heartbeat while the task runs.
+- The lock is not exported to backups.
 
-## 推荐配置
+## Recommended setup
 
-个人实例建议：
+For a personal instance:
 
-- 至少一个远程备份目标。
-- 每 24 小时备份一次。
-- 保留 30 份。
-- 勾选附件。
-- 每次大版本更新前手动运行一次。
+- Configure at least one remote backup target.
+- Back up every 24 hours.
+- Retain 30 backups.
+- Include attachments.
+- Run a manual backup before every major update.
 
-如果附件很多，可以把远程目标放在便宜稳定的 S3 兼容存储上；WebDAV 更适合已有 NAS 或网盘生态的用户。
+If you have many attachments, use stable and inexpensive S3-compatible storage. WebDAV is convenient when you already have a NAS or cloud-drive ecosystem.

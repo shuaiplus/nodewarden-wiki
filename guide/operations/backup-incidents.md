@@ -1,49 +1,48 @@
-# 备份事故处理
+# Backup Incidents
 
-## 远程备份显示成功但担心文件损坏
+## Remote backup says success but you suspect corruption
 
-在备份中心使用远程完整性检查。服务端会下载远程 ZIP，并对比文件名里的 hash 前缀。
+Use remote integrity check in the backup center. The server downloads the remote ZIP and compares it with the hash prefix in the file name.
 
-如果 hash 不匹配，不要立刻删除旧备份。先下载该文件、本地保存，再运行新的手动备份。
+If the hash does not match, do not delete old backups immediately. Download the suspicious file, save it locally, then run a new manual backup.
 
-## 恢复后备份设置需要修复
+## Backup settings need repair after restore
 
-这通常是 JWT_SECRET 不同导致 runtime 信封无法解密。进入备份中心后，系统会根据 portable 部分提示管理员重新保存备份设置。
+This usually means the restored instance has a different `JWT_SECRET`, so the runtime envelope cannot be decrypted. Open the backup center and let the administrator re-save backup settings from the portable part.
 
-修复后会用当前 JWT_SECRET 重新生成 runtime 密文。
+After repair, NodeWarden regenerates runtime ciphertext using the current `JWT_SECRET`.
 
-## 附件部分恢复失败
+## Some attachments fail to restore
 
-还原结果会返回 skipped 列表。常见原因：
+Restore results return a skipped list. Common causes:
 
-- 远程 `attachments/` 目录缺少 blob。
-- KV 模式下附件超过 25 MiB。
-- 目标实例没有绑定 R2/KV。
-- 写入 R2/KV 失败。
+- Remote `attachments/` directory is missing a blob.
+- KV mode sees an attachment larger than 25 MiB.
+- Target instance has no R2/KV binding.
+- Writing to R2/KV failed.
 
-服务端会把失败附件从恢复后的 attachments 表移除，所以密码项不会引用不存在的附件。
+The server removes failed attachments from the restored `attachments` table, so ciphers do not reference files that do not exist.
 
-## 误删远程 attachments 目录
+## Remote `attachments/` directory was deleted
 
-远程 ZIP 本身通常只包含 `manifest.json` 和 `db.json`，历史附件依赖远程 `attachments/` 目录。误删后：
+Remote ZIP files usually contain only `manifest.json` and `db.json`; historical attachments depend on the remote `attachments/` directory. If it was deleted:
 
-1. 不要清理旧 ZIP。
-2. 先检查本地是否有完整导出的 ZIP。
-3. 如果当前实例仍有附件，立刻运行一次包含附件的远程备份，重新上传仍存在的附件 blob。
-4. 对已经丢失且当前实例也没有的附件，只能从其他备份恢复。
+1. Do not clean old ZIP files.
+2. Check whether you have a complete local export ZIP.
+3. If the current instance still has attachments, immediately run a remote backup with attachments included to reupload remaining blobs.
+4. Attachments that are missing remotely and no longer exist in the current instance can only be recovered from other backups.
 
-## 误换 JWT_SECRET
+## `JWT_SECRET` was changed by mistake
 
-影响：
+Impact:
 
-- 已登录会话失效。
-- 附件和 Send 短链失效。
-- 备份设置 runtime 解密失败。
+- Logged-in sessions become invalid.
+- Attachment and Send short links become invalid.
+- Backup settings runtime decryption fails.
 
-处理：
+Recovery:
 
-1. 如果知道旧 JWT_SECRET，恢复旧值。
-2. 如果不知道旧值，进入备份中心重新保存备份目标。
-3. 通知用户重新登录。
-4. 重新运行一次手动备份。
-
+1. If you know the old `JWT_SECRET`, restore it.
+2. If you do not know it, open the backup center and re-save backup targets.
+3. Ask users to log in again.
+4. Run a new manual backup.

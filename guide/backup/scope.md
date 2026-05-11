@@ -1,66 +1,66 @@
-# 备份内容边界
+# Backup Scope
 
-备份系统使用白名单导出和白名单导入。这样做的目的不是省事，而是避免把旧字段、敏感运行态数据、临时锁或不该迁移的 token 带到新实例。
+The backup system uses allowlisted export and allowlisted import. The goal is not convenience; it is to avoid migrating obsolete fields, sensitive runtime state, temporary locks, or tokens that should not move to a new instance.
 
-## 会备份的内容
+## Included data
 
-实例备份会导出这些表或字段：
+Instance backups export these tables or fields:
 
-| 表 | 内容 |
+| Table | Content |
 | --- | --- |
-| `config` | 普通配置行，以及便携化后的 `backup.settings.v1`。 |
-| `users` | 用户、主密码验证 hash、加密用户 key、加密私钥、公钥、KDF、角色、状态、TOTP 信息等。 |
-| `domain_settings` | 用户等效域名、自定义域名规则、排除的全局域名规则。 |
-| `user_revisions` | 每个用户的同步 revision date。 |
-| `folders` | 文件夹。 |
-| `ciphers` | 密码项主体、加密字段、归档/删除状态、未知兼容字段。 |
-| `attachments` | 附件元数据。 |
-| 附件正文 | 仅在选择包含附件时导出或远程引用。 |
+| `config` | Regular config rows and portable `backup.settings.v1`. |
+| `users` | Users, master password verification hashes, encrypted user keys, encrypted private keys, public keys, KDF, role, status, TOTP data, and related fields. |
+| `domain_settings` | User equivalent domains, custom domain rules, and excluded global domain rules. |
+| `user_revisions` | Per-user sync revision dates. |
+| `folders` | Folders. |
+| `ciphers` | Cipher bodies, encrypted fields, archive/delete status, and unknown compatibility fields. |
+| `attachments` | Attachment metadata. |
+| Attachment bodies | Exported or remotely referenced only when attachments are included. |
 
-## 不会备份的内容
+## Excluded data
 
-这些数据不会进入实例备份：
+These values do not enter instance backups:
 
-| 内容 | 不备份原因 |
+| Data | Why it is excluded |
 | --- | --- |
-| `backup.runner.lock.v1` | 运行锁，只代表当前是否有任务正在执行。 |
-| `users.api_key` | 旧敏感字段明确不导出，避免恢复旧密钥。 |
-| `refresh_tokens` | 登录会话不应该跨实例恢复。 |
-| `trusted_two_factor_device_tokens` | 记住设备 token 属于当前设备信任状态。 |
-| `devices` | 设备会话和受信任设备状态不随备份迁移。 |
-| `invites` | 邀请码是管理操作，不是密码库数据。 |
-| `audit_logs` | 审计日志不进入当前备份格式。 |
-| `login_attempts_ip` | 限流和锁定状态属于运行态。 |
-| `used_attachment_download_tokens` | 一次性附件下载 token 消费记录。 |
-| `sends` | 当前实例级备份不导出 Send。 |
-| Send 文件正文 | 当前实例级备份不导出 Send 文件。 |
+| `backup.runner.lock.v1` | Runtime lock that only means a task is currently running. |
+| `users.api_key` | Old sensitive field explicitly excluded to avoid restoring old keys. |
+| `refresh_tokens` | Login sessions should not be restored across instances. |
+| `trusted_two_factor_device_tokens` | Remembered-device tokens belong to current device trust state. |
+| `devices` | Device sessions and trusted state should not migrate with backups. |
+| `invites` | Invite codes are administrative operations, not vault data. |
+| `audit_logs` | Audit logs are not part of the current backup format. |
+| `login_attempts_ip` | Rate limit and lockout state is runtime state. |
+| `used_attachment_download_tokens` | One-time attachment token consumption records. |
+| `sends` | Current instance-level backups do not export Send. |
+| Send file bodies | Current instance-level backups do not export Send files. |
 
-如果你依赖 Send 做长期分享，要单独处理。实例备份主要保护账号、密码库、文件夹、附件和备份配置。
+If you rely on Send for long-term sharing, handle it separately. Instance backup primarily protects accounts, vault items, folders, attachments, domain rules, and backup settings.
 
-## 附件是否备份
+## Are attachments backed up
 
-附件由两部分组成：
+Attachments have two parts:
 
-- D1 `attachments` 表：附件 ID、cipher_id、加密文件名、大小、加密 key。
-- R2/KV blob：真正的二进制文件。
+- D1 `attachments` table: attachment ID, `cipher_id`, encrypted file name, size, encrypted key.
+- R2/KV blob: the actual binary file.
 
-如果不勾选“包含附件”，备份会把 `attachments` 行清空导出，避免恢复后留下指向不存在文件的脏记录。
+If "include attachments" is not selected, the backup exports `attachments` as an empty set so restore does not leave dangling records pointing at missing files.
 
-如果勾选“包含附件”，备份会记录附件元数据和 blob 引用。还原时如果某个附件文件缺失或无法写入目标存储，该附件会被跳过，并且对应附件行会从恢复后的 shadow 表里删除，不会留下坏记录。
+If "include attachments" is selected, the backup records attachment metadata and blob references. During restore, if a file is missing or cannot be written to target storage, that attachment is skipped and its row is removed from the restored shadow table. The database is not left with broken attachment records.
 
-## config 的特殊处理
+## Special handling for `config`
 
-`config` 表不是原样全导出。导出前会过滤：
+The `config` table is not exported wholesale. Export filters:
 
-- 跳过空 key。
-- 跳过 `backup.runner.lock.v1`。
-- 对 `backup.settings.v1` 只导出 portable 部分，不导出当前实例 runtime 密文。
+- Skip empty keys.
+- Skip `backup.runner.lock.v1`.
+- Export only the portable part of `backup.settings.v1`, not the current instance's runtime ciphertext.
 
-这是备份配置能跨实例恢复的关键。
+This is what allows backup settings to be restored across instances.
 
-## 修改代码时的同步要求
+## Code change checklist
 
-如果未来新增持久表或字段，需要同时检查：
+If future changes add persistent tables or fields, check:
 
 - `src/services/backup-archive.ts`
 - `src/services/backup-import.ts`
@@ -68,5 +68,4 @@
 - `migrations/0001_init.sql`
 - `src/services/storage-schema.ts`
 
-只改数据库 schema 不改备份，会导致新数据永远无法从备份恢复。
-
+Changing the database schema without changing backup means the new data can never be restored from backup.

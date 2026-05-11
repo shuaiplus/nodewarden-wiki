@@ -1,69 +1,68 @@
-# 附件与文件存储
+# Attachments and Storage
 
-NodeWarden 把附件元数据和文件正文分开存储。
+NodeWarden stores attachment metadata separately from file bodies.
 
-## 存储位置
+## Storage locations
 
-| 数据 | 保存位置 |
+| Data | Location |
 | --- | --- |
-| 附件 ID、cipher_id、加密文件名、大小、加密 key | D1 `attachments` 表 |
-| 附件二进制正文 | R2 `ATTACHMENTS` 或 KV `ATTACHMENTS_KV` |
-| Send 文件正文 | R2/KV，key 前缀为 `sends/` |
+| Attachment ID, `cipher_id`, encrypted file name, size, encrypted key | D1 `attachments` table |
+| Attachment binary body | R2 `ATTACHMENTS` or KV `ATTACHMENTS_KV` |
+| Send file body | R2/KV with the `sends/` key prefix |
 
-附件对象 key 使用：
+Attachment object keys use:
 
 ```text
 <cipherId>/<attachmentId>
 ```
 
-Send 文件对象 key 使用：
+Send file object keys use:
 
 ```text
 sends/<sendId>/<fileId>
 ```
 
-## R2 优先
+## R2 first
 
-`src/services/blob-store.ts` 会优先选择 R2：
+`src/services/blob-store.ts` chooses storage in this order:
 
-1. 如果绑定 `ATTACHMENTS`，使用 R2。
-2. 否则如果绑定 `ATTACHMENTS_KV`，使用 KV。
-3. 都没有绑定时，上传会报“Attachment storage is not configured”。
+1. If `ATTACHMENTS` is bound, use R2.
+2. Otherwise, if `ATTACHMENTS_KV` is bound, use KV.
+3. If neither is bound, uploads fail with “Attachment storage is not configured”.
 
-## 大小限制
+## Size limits
 
-NodeWarden 默认附件上限是 100 MB，但 KV 模式会被压到 25 MiB。原因是 Cloudflare KV 单对象有限制。
+NodeWarden's default attachment limit is 100 MB, but KV mode is capped at 25 MiB because of Cloudflare KV object limits.
 
-如果你希望稳定使用附件和 Send 文件，推荐 R2。
+For stable attachment and Send file support, use R2.
 
-## 上传流程
+## Upload flow
 
-官方客户端上传附件通常分两步：
+Official clients usually upload attachments in two steps:
 
-1. `POST /api/ciphers/{cipherId}/attachment/v2` 创建附件元数据。
-2. 客户端拿到带 token 的 upload URL，再上传二进制正文。
+1. `POST /api/ciphers/{cipherId}/attachment/v2` creates attachment metadata.
+2. The client receives an upload URL with a short token, then uploads the binary body.
 
-上传 token 是短期 JWT，包含：
+The upload token is a short-lived JWT containing:
 
 - `userId`
 - `cipherId`
 - `attachmentId`
 - `exp`
 
-服务端会检查 token、密码项归属、附件归属，再把文件写入 R2/KV。
+The server verifies the token, cipher ownership, and attachment ownership before writing the file to R2 or KV.
 
-## 下载流程
+## Download flow
 
-下载也使用短期 token：
+Downloads also use short-lived tokens:
 
-1. 已登录用户请求附件信息。
-2. 服务端生成 5 分钟有效的下载 token。
-3. 客户端访问 `/api/attachments/{cipherId}/{attachmentId}?token=...`。
-4. 服务端验证 token、检查附件存在、读取 R2/KV。
+1. An authenticated user requests attachment information.
+2. The server generates a download token valid for 5 minutes.
+3. The client opens `/api/attachments/{cipherId}/{attachmentId}?token=...`.
+4. The server verifies the token, checks that the attachment exists, and reads R2 or KV.
 
-下载 token 里有 `jti`。服务端用 `used_attachment_download_tokens` 表记录已使用的 jti，确保同一个下载 token 只能消费一次。
+Download tokens include `jti`. The server records consumed `jti` values in `used_attachment_download_tokens`, so the same download token can only be used once.
 
-## 删除流程
+## Delete flow
 
-删除密码项或附件时，服务端会先删除 R2/KV 对象，再删 D1 元数据。批量删除附件时使用小并发，避免 Worker 请求里一次性压太多存储操作。
-
+When deleting a cipher or attachment, the server deletes the R2/KV object first, then deletes D1 metadata. Bulk attachment deletion uses small concurrency so one Worker request does not overload storage operations.

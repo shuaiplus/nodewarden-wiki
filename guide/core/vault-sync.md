@@ -1,32 +1,32 @@
-# 密码库与同步
+# Vault and Sync
 
-密码库核心由 folders、ciphers、attachments、user_revisions 组成。官方客户端最重要的接口是 `/api/sync`。
+The vault core consists of folders, ciphers, attachments, and user revisions. The most important official-client endpoint is `/api/sync`.
 
-## 数据写入
+## Data writes
 
-密码项写入主要经过 `src/handlers/ciphers.ts`：
+Cipher writes mainly go through `src/handlers/ciphers.ts`:
 
-- 创建密码项：`handleCreateCipher()`
-- 更新密码项：`handleUpdateCipher()`
-- 软删除：`handleDeleteCipher()`
-- 永久删除：`handlePermanentDeleteCipher()`
-- 批量移动、归档、恢复、删除：对应 bulk handler
+- Create cipher: `handleCreateCipher()`
+- Update cipher: `handleUpdateCipher()`
+- Soft delete: `handleDeleteCipher()`
+- Permanent delete: `handlePermanentDeleteCipher()`
+- Bulk move, archive, restore, and delete: corresponding bulk handlers
 
-每次影响密码库内容的操作都会更新用户 revision date，并通过 Durable Object 通知网页端或其他会话刷新。
+Any operation that changes vault content updates the user's revision date and notifies the Web Vault or other sessions through the Durable Object notification hub.
 
-## 未知字段保留
+## Unknown field passthrough
 
-官方 Bitwarden 客户端可能在新版本里新增字段。NodeWarden 的密码项策略是：
+Official Bitwarden clients may add fields in new versions. NodeWarden's cipher policy is:
 
-1. 保存时尽量保留客户端传来的未知字段。
-2. 输出时先展开存储字段，再覆盖服务端控制字段。
-3. 只有明确无效或服务端拥有的字段才会被改写。
+1. Preserve unknown fields submitted by the client whenever possible.
+2. Expand stored fields when responding, then override server-controlled fields.
+3. Rewrite only clearly invalid fields or fields owned by the server.
 
-这就是 `cipherToResponse()` 里“opaque passthrough”的意义。它能减少客户端升级后字段丢失的风险。
+This is the reason for the opaque passthrough behavior in `cipherToResponse()`. It reduces the risk of losing client-added fields after a client upgrade.
 
-## 服务端控制字段
+## Server-controlled fields
 
-这些字段不信任客户端输入，由服务端控制：
+These fields are not trusted from client input and are controlled by the server:
 
 - `id`
 - `userId`
@@ -38,20 +38,20 @@
 - `permissions`
 - `attachments`
 
-更新时如果客户端提交旧的 `lastKnownRevisionDate`，服务端会和现有 `updatedAt` 比较。太旧的更新会被拒绝，避免旧客户端覆盖新数据。
+When a client submits an old `lastKnownRevisionDate`, the server compares it with the current `updatedAt`. Stale updates can be rejected to prevent an old client copy from overwriting newer data.
 
-## `/api/sync` 响应
+## `/api/sync` response
 
-`src/handlers/sync.ts` 会读取：
+`src/handlers/sync.ts` reads:
 
-- 用户 profile
-- folders
-- ciphers
-- sends
-- attachmentsByCipher
-- domain settings
+- User profile
+- Folders
+- Ciphers
+- Sends
+- Attachments grouped by cipher
+- Domain settings
 
-然后组装：
+It then builds:
 
 - `profile`
 - `folders`
@@ -64,13 +64,12 @@
 - `UserDecryptionOptions`
 - `userDecryption`
 
-同步响应会按用户 revision date 建立缓存 key。只要 revision date 不变，短时间内重复同步可以复用缓存。
+The sync response uses the user's revision date as part of its cache key. If the revision date does not change, repeated syncs in a short window can reuse cached output.
 
-## 兼容性过滤
+## Compatibility filtering
 
-同步时会跳过明显不兼容的 cipher 响应。例如 `name` 必须是有效的 Bitwarden EncString。这样可以避免某条坏数据导致官方客户端在 HTTP 200 后崩掉或整库无法打开。
+During sync, NodeWarden skips clearly incompatible cipher responses. For example, `name` must be a valid Bitwarden EncString. This avoids one bad row causing an official client to crash or fail to open the entire vault after an HTTP 200.
 
-## 分页接口
+## Pagination
 
-普通 `/api/ciphers` 支持分页参数。分页主要服务网页端和大库场景，避免一次性构建过多 cipher response。
-
+Regular `/api/ciphers` supports pagination parameters. Pagination mainly serves the Web Vault and large-vault scenarios so the frontend does not need to build too many cipher responses at once.

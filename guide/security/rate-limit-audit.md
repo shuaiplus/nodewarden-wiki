@@ -1,56 +1,55 @@
-# 权限、限流与审计
+# Permissions, Rate Limits, and Audit
 
-## 管理员权限
+## Administrator permissions
 
-第一个注册用户自动成为管理员。后续用户默认是普通用户，通常需要邀请码注册。
+The first registered user automatically becomes an administrator. Later users are regular users by default and usually need an invite to register.
 
-备份中心、用户管理、邀请码等管理功能会检查：
+The backup center, user management, invites, and similar administrator features check:
 
 ```text
 role === "admin" && status === "active"
 ```
 
-禁用用户即使 token 仍未过期，也会在认证后被拒绝。
+Disabled users are rejected after authentication even if their token has not expired.
 
-## 限流
+## Rate limits
 
-限流由 `src/services/ratelimit.ts` 和 `src/config/limits.ts` 控制。重要限制包括：
+Rate limits are controlled by `src/services/ratelimit.ts` and `src/config/limits.ts`.
 
-| 场景 | 默认值 |
+| Scenario | Default |
 | --- | --- |
-| 公开接口 | 60 次/分钟/IP |
-| 公开只读接口 | 120 次/分钟/IP |
-| 敏感公开/认证接口 | 30 次/分钟/IP |
-| 认证 API | 200 次/分钟/用户 |
-| 注册接口 | 5 次/分钟/IP |
-| refresh token | 30 次/分钟/IP |
-| 密码提示 | 1 次/分钟/IP，3 次/小时/IP |
-| 登录失败锁定 | 10 次失败后锁定 2 分钟 |
+| Public APIs | 60 requests/minute/IP |
+| Public read-only APIs | 120 requests/minute/IP |
+| Sensitive public or authenticated APIs | 30 requests/minute/IP |
+| Authenticated API | 200 requests/minute/user |
+| Registration | 5 requests/minute/IP |
+| Refresh token | 30 requests/minute/IP |
+| Password hint | 1 request/minute/IP and 3 requests/hour/IP |
+| Login failure lockout | Lock for 2 minutes after 10 failures |
 
-登录失败记录保存在 `login_attempts_ip`，会低频清理过期记录。
+Login failure records are stored in `login_attempts_ip`, and expired records are cleaned at low frequency.
 
-## 大请求限制
+## Large request limits
 
-普通 JSON API 默认最大 25 MiB。文件上传路径例外，例如：
+Regular JSON APIs default to a 25 MiB maximum body size. File upload paths are exceptions, such as:
 
-- 附件上传
-- Send 文件上传
-- 备份导入
+- Attachment upload
+- Send file upload
+- Backup import
 
-文件大小另外由附件/Send 限制控制。
+File sizes are controlled separately by attachment and Send limits.
 
-## 审计日志
+## Audit logs
 
-审计日志保存在 `audit_logs` 表。当前会记录：
+Audit logs are stored in the `audit_logs` table. Current logs include:
 
-- 首个管理员注册
-- 邀请注册
-- 密码变更
-- 备份设置更新
-- 手动/定时远程备份成功或失败
-- 实例备份导出
-- 实例备份导入
-- 远程备份删除
+- First administrator registration
+- Invite registration
+- Password changes
+- Backup setting updates
+- Manual or scheduled remote backup success and failure
+- Instance backup export
+- Instance backup import
+- Remote backup deletion
 
-当前实例备份不会导出审计日志。审计日志更偏运行痕迹，不是密码库核心数据。
-
+Current instance backups do not export audit logs. Audit logs are runtime trace data, not core vault data.

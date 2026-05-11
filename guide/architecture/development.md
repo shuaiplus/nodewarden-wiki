@@ -1,17 +1,17 @@
-# 开发与代码约定
+# Development Conventions
 
-如果还没判断清楚这次改动会牵动哪些文件，先看 [变更维护地图](/guide/architecture/change-map)。这页只列命令和局部约定，真正的跨层影响要从维护地图里反推。
+If you have not yet identified which files a change touches, start with the [Change Map](/guide/architecture/change-map). This page lists commands and local rules; cross-layer impact should be reasoned from the change map.
 
-## 推荐检查命令
+## Recommended checks
 
-后端或共享代码改动：
+Backend or shared code:
 
 ```powershell
 npx tsc -p tsconfig.json --noEmit
 npm run build
 ```
 
-前端文案或 i18n 改动：
+Frontend copy or i18n:
 
 ```powershell
 npm run i18n:validate
@@ -19,16 +19,16 @@ npx tsc -p webapp/tsconfig.json --noEmit
 npm run build
 ```
 
-wiki 改动：
+Wiki:
 
 ```powershell
 cd wiki
 npm run build
 ```
 
-## 高风险区域
+## High-risk areas
 
-这些区域改动要特别小心：
+Keep changes especially careful around:
 
 - `src/handlers/ciphers.ts`
 - `src/handlers/sync.ts`
@@ -40,26 +40,26 @@ npm run build
 - `src/handlers/accounts.ts`
 - `src/services/storage-schema.ts`
 
-## i18n 原则
+## i18n principle
 
-前端 locale 是独立完整包，不是英文包加增量覆盖。新增文案要同步所有 locale，并运行 i18n 校验。
+Frontend locale files are complete independent bundles, not English plus incremental overrides. Add new copy to every locale and run i18n validation.
 
-## 备份变更原则
+## Backup change principle
 
-备份导出和导入是契约。新增持久数据时不要只改导出，也不要只改导入。至少要同步：
+Backup export and import are a contract. For persistent data, do not update only export or only import. At minimum, check:
 
-- payload 类型
-- SQL 查询
-- manifest tableCounts
-- 内容验证
-- shadow 表导入
-- 前端计数类型
+- Payload types
+- SQL queries
+- Manifest table counts
+- Content validation
+- Shadow-table import
+- Frontend count types
 
-## 密码库字段原则
+## Cipher field principle
 
-不要随意删未知字段。官方客户端可能已经依赖它们。密码项逻辑应继续遵守：
+Do not delete unknown fields casually. Official clients may already depend on them. Cipher logic should continue to:
 
-- 保留未知字段。
-- 覆盖服务端拥有字段。
-- 对关键加密字段做兼容规范化。
-- 同步前过滤明显坏数据。
+- Preserve unknown fields.
+- Override server-owned fields.
+- Normalize critical encrypted fields for compatibility.
+- Filter clearly broken data before sync.

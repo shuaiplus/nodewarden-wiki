@@ -1,10 +1,10 @@
-# 备份配置加密设计
+# Backup Settings Encryption
 
-备份目标里会保存 WebDAV 密码、S3 Access Key、S3 Secret Key 等敏感信息。NodeWarden 没有把这些内容当普通 JSON 明文塞进 D1，而是使用 v2 加密信封。
+Backup targets store sensitive values such as WebDAV passwords, S3 access keys, and S3 secret keys. NodeWarden does not store them as ordinary plaintext JSON in D1. It uses a v2 encrypted envelope.
 
-相关代码在 `src/services/backup-settings-crypto.ts`。
+Relevant code lives in `src/services/backup-settings-crypto.ts`.
 
-## v2 信封结构
+## v2 envelope shape
 
 ```json
 {
@@ -26,64 +26,64 @@
 }
 ```
 
-这个结构有两个目标：
+The structure has two goals:
 
-- runtime：当前服务器定时任务能自动解密并运行备份。
-- portable：备份恢复或迁移后，管理员可以重新修复备份配置。
+- Runtime: the current server can decrypt settings automatically and run scheduled backups.
+- Portable: after backup restore or migration, an administrator can repair backup settings.
 
-## runtime 加密
+## Runtime encryption
 
-runtime 部分使用：
+The runtime part uses:
 
 - HKDF-SHA256
-- 输入密钥：`JWT_SECRET`
-- salt：`nodewarden.backup-settings.runtime.v2`
-- info：`runtime`
-- 派生 256-bit AES-GCM key
-- AES-GCM 随机 12 字节 IV 加密配置 JSON
+- Input key: `JWT_SECRET`
+- Salt: `nodewarden.backup-settings.runtime.v2`
+- Info: `runtime`
+- Derived key: 256-bit AES-GCM key
+- Encryption: AES-GCM with a random 12-byte IV over the settings JSON
 
-这意味着只要 JWT_SECRET 没变，服务器就能自动解密备份设置，并在 cron 里运行远程备份。
+As long as `JWT_SECRET` is unchanged, the server can decrypt backup settings and run remote backups from cron.
 
-如果 JWT_SECRET 变了，runtime 解密会失败，备份中心会提示需要管理员重新激活或修复。
+If `JWT_SECRET` changes, runtime decryption fails, and the backup center asks an administrator to reactivate or repair settings.
 
-## portable 加密
+## Portable encryption
 
-portable 部分使用随机 DEK：
+The portable part uses a random DEK:
 
-1. 生成 32 字节随机 DEK。
-2. 用 DEK 作为 AES-GCM key 加密同一份配置 JSON。
-3. 找出所有 active admin 且有 publicKey 的用户。
-4. 用管理员公钥 RSA-OAEP 包装 DEK。
-5. 每个管理员得到一个 `wrappedKey`。
+1. Generate a random 32-byte DEK.
+2. Encrypt the same settings JSON with the DEK as an AES-GCM key.
+3. Find all active admin users with a `publicKey`.
+4. Wrap the DEK with each administrator public key using RSA-OAEP.
+5. Store one `wrappedKey` for each administrator.
 
-这样导出的备份里不会出现可直接给当前服务器使用的 runtime 密文，但保留了“管理员可恢复”的 portable 数据。
+The exported backup does not contain runtime ciphertext that the current server can use directly. It keeps enough portable data for an administrator to recover.
 
-当前 portable wrapping 与 Bitwarden/浏览器兼容边界保持一致，使用 RSA-OAEP 和 SHA-1 hash 参数。这不是给新业务自创加密协议的入口；修改它会影响旧备份恢复和管理员密钥解包。
+Portable wrapping keeps the current Bitwarden/browser compatibility boundary and uses RSA-OAEP with SHA-1 hash parameters. This is not an entry point for inventing a new encryption protocol; changing it affects old backup restore and administrator key unwrap.
 
-## 为什么需要双层
+## Why two layers
 
-只有 runtime 不够：恢复到新实例后，如果 JWT_SECRET 不同，备份配置就完全解不开。
+Runtime alone is not enough: after restoring to a new instance with a different `JWT_SECRET`, backup settings would be unreadable.
 
-只有 portable 也不够：定时任务不能每次都要求管理员私钥参与，否则服务器无法自动运行备份。
+Portable alone is also not enough: scheduled tasks cannot require an administrator private key every time they run.
 
-双层信封把这两个需求分开：
+The two-layer envelope separates the requirements:
 
-- 日常运行靠 runtime。
-- 跨实例恢复靠 portable。
+- Daily operation uses runtime.
+- Cross-instance recovery uses portable.
 
-## 导出时如何处理
+## Export behavior
 
-实例备份导出 `backup.settings.v1` 时，会调用 `exportPortableBackupSettingsEnvelope()`。导出的配置只保留 portable 部分，runtime 会被清空。
+When instance backup exports `backup.settings.v1`, it calls `exportPortableBackupSettingsEnvelope()`. The exported config keeps only portable data and clears runtime data.
 
-恢复后，`normalizeImportedBackupSettingsValue()` 会尝试重新生成当前实例可用的 runtime 信封。如果当前 JWT_SECRET 解不开，就保留 portable 数据，等管理员进入备份中心修复。
+After restore, `normalizeImportedBackupSettingsValue()` tries to regenerate a runtime envelope for the current instance. If the current `JWT_SECRET` cannot decrypt the imported data, portable data is kept until an administrator repairs it in the backup center.
 
-## 没有管理员公钥怎么办
+## If no administrator public key exists
 
-`encryptBackupSettingsEnvelope()` 本身要求至少有一个 active admin 公钥。实际保存时，`saveBackupSettings()` 会先检查管理员公钥；如果系统还没有可用公钥，会退回普通 JSON。这个情况主要出现在早期初始化或兼容状态。正常注册流程要求用户公钥和加密私钥存在，因此正式实例一般会使用加密信封。
+`encryptBackupSettingsEnvelope()` requires at least one active admin public key. On save, `saveBackupSettings()` checks for admin public keys first. If none are available, it falls back to plain JSON. This mainly covers early initialization or compatibility states. Normal registration requires a user public key and encrypted private key, so production instances usually use the encrypted envelope.
 
-## 实践建议
+## Practical advice
 
-- 不要手改 `backup.settings.v1`。
-- 不要丢 JWT_SECRET。
-- 恢复后第一时间进入备份中心，看是否提示需要修复。
-- 至少保留一个 active admin 账号，并确保它有 publicKey。
+- Do not edit `backup.settings.v1` manually.
+- Do not lose `JWT_SECRET`.
+- After restore, open the backup center immediately and check whether repair is required.
+- Keep at least one active admin account with a valid `publicKey`.

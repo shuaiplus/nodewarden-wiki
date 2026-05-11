@@ -1,63 +1,62 @@
-# 两步验证与设备
+# Two-Step Login and Devices
 
-NodeWarden 当前实现的是用户级 TOTP，不是完整企业级 2FA provider 系统。
+NodeWarden currently implements user-level TOTP. It is not a full enterprise 2FA provider system.
 
-## 启用 TOTP
+## Enabling TOTP
 
-启用时需要：
+Enabling TOTP requires:
 
 - TOTP secret
-- 当前验证码
+- Current verification code
 
-服务端会规范化 secret，验证当前 token。如果验证通过，保存 `totp_secret`，并生成 `totp_recovery_code`。
+The server normalizes the secret and verifies the current token. If verification succeeds, it stores `totp_secret` and generates `totp_recovery_code`.
 
-启用或关闭 TOTP 后，会删除该用户 refresh token，要求客户端重新登录。
+After enabling or disabling TOTP, the server deletes the user's refresh tokens and requires clients to log in again.
 
-## 登录挑战
+## Login challenge
 
-如果用户启用了 TOTP，密码验证通过后，服务端会返回官方客户端能识别的 2FA challenge：
+If TOTP is enabled, after password verification succeeds the server returns a 2FA challenge official clients can recognize:
 
 - `TwoFactorProviders`
 - `TwoFactorProviders2`
 - `SsoEmail2faSessionToken`
 - `MasterPasswordPolicy`
-- OAuth 风格错误字段
+- OAuth-style error fields
 
-Android 客户端对 provider 值比较敏感，所以代码里兼容了恢复码 provider 的不同历史值。
+Android clients are sensitive to provider values, so the code keeps compatibility with historical recovery-code provider values.
 
-## 记住设备
+## Remembered devices
 
-如果用户勾选记住设备，服务端会生成 trusted two factor token，并绑定到 device identifier。
+If the user chooses to remember a device, the server creates a trusted two factor token and binds it to the device identifier.
 
-下次登录使用 remember provider 时，服务端会检查：
+On the next login with the remember provider, the server checks:
 
-- token 是否存在。
-- token 是否绑定当前 device identifier。
-- token 是否属于当前用户。
-- token 是否过期。
+- The token exists.
+- The token is bound to the current device identifier.
+- The token belongs to the current user.
+- The token has not expired.
 
-## 恢复码
+## Recovery code
 
-恢复码可以关闭 TOTP。恢复成功后：
+A recovery code can disable TOTP. After successful recovery:
 
-- `totp_secret` 清空。
-- 恢复码轮换。
-- `securityStamp` 更新。
-- refresh token 全部删除。
+- `totp_secret` is cleared.
+- The recovery code is rotated.
+- `securityStamp` is updated.
+- All refresh tokens are deleted.
 
-恢复码应该离线保存。不要把它写到主密码提示里。
+Recovery codes should be stored offline. Do not put them in the master password hint.
 
-## 设备列表
+## Device list
 
-设备表保存：
+The devices table stores:
 
-- device identifier
-- 名称
-- 类型
-- session stamp
-- 设备加密 key
-- 禁用状态
-- 最近访问时间
+- Device identifier
+- Name
+- Type
+- Session stamp
+- Device encryption key
+- Disabled state
+- Last access time
 
-设备相关操作会影响 token 验证。删除设备后，该设备绑定的 token 会失效。
-
+Device operations affect token verification. After deleting a device, tokens bound to that device are invalid.

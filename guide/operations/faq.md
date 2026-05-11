@@ -1,36 +1,35 @@
-# 常见问题
+# FAQ
 
-## JWT_SECRET 可以随便换吗
+## Can I change `JWT_SECRET` casually?
 
-不可以。换了会导致旧 token 失效，备份配置 runtime 解密失败。正式环境应该用 Cloudflare Secret 长期保存。
+No. Changing it invalidates old tokens and breaks backup settings runtime decryption. Production instances should keep it as a long-lived Cloudflare Secret.
 
-## 忘记主密码能改数据库恢复吗
+## Can I recover a forgotten master password by editing the database?
 
-不能。`master_password_hash` 只是登录验证，不是 vault 解密密钥。改数据库无法解密已有密码库。
+No. `master_password_hash` is only for login verification, not vault decryption. Editing the database cannot decrypt the existing vault.
 
-## 备份会备份 Send 吗
+## Does backup include Send?
 
-当前实例备份不导出 `sends` 表，也不导出 Send 文件。它主要备份用户、密码项、文件夹、域名规则、附件和备份配置。
+Current instance backups do not export the `sends` table or Send files. They mainly back up users, ciphers, folders, domain rules, attachments, and backup settings.
 
-## 为什么远程备份 ZIP 里没有附件文件
+## Why are attachment files missing from remote backup ZIPs?
 
-远程备份为了增量复用附件，附件正文单独放在远程 `attachments/` 目录。ZIP 的 manifest 记录引用。还原时会按需读取这些 blob。
+Remote backups store attachment bodies separately in the remote `attachments/` directory so attachments can be reused incrementally. The ZIP manifest records references. Restore reads those blobs as needed.
 
-本地完整导出勾选附件后，前端会拉取 blob 并重新打包成带附件文件的 ZIP。
+For a complete local export, if attachments are selected, the frontend fetches blobs and repackages a ZIP that includes attachment files.
 
-## KV 模式为什么大附件失败
+## Why do large attachments fail in KV mode?
 
-Cloudflare KV 单对象有大小限制。NodeWarden 在 KV 模式下会把附件/Send 文件限制压到 25 MiB。需要大附件请使用 R2。
+Cloudflare KV has a single-object size limit. NodeWarden caps attachment and Send files to 25 MiB in KV mode. Use R2 for large attachments.
 
-## 更新后需要手动跑 SQL 吗
+## Do updates require manual SQL?
 
-通常不需要。Worker 会根据 `config.schema.version` 自动运行幂等 schema 初始化。
+Usually no. The Worker automatically runs idempotent schema initialization based on `config.schema.version`.
 
-## 第一个用户为什么是管理员
+## Why is the first user an administrator?
 
-首次注册时，如果 `users` 表为空，服务端会把第一个用户设为 admin，并写入 `registered=true`。
+During first registration, if the `users` table is empty, the server assigns the first user `admin` role and writes `registered=true`.
 
-## 可以向 Bitwarden 官方反馈 NodeWarden 的问题吗
+## Should I report NodeWarden issues to Bitwarden?
 
-不要。NodeWarden 是独立项目，和 Bitwarden 官方无关。遇到问题应该在 NodeWarden 项目内反馈。
-
+No. NodeWarden is an independent project and is not affiliated with Bitwarden. Report NodeWarden issues in the NodeWarden project.

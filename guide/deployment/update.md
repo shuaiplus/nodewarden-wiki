@@ -1,86 +1,86 @@
-# 更新与维护
+# Updates and Maintenance
 
-NodeWarden 的更新重点是保持代码、D1 schema、前端资源和 JWT_SECRET 稳定。
+NodeWarden updates focus on keeping code, the D1 schema, frontend assets, and `JWT_SECRET` stable.
 
-## Fork 用户要做什么
+## What fork users should do
 
-如果你 Fork 了仓库，在 GitHub 页面点击：
+If you forked the repository, click this on GitHub:
 
 ```text
 Sync fork -> Update branch
 ```
 
-然后等待 Cloudflare 重新部署。部署完成后，Worker 首次处理请求时会检查 D1 schema version；如果版本变化，会自动执行运行时 schema 初始化。
+Then wait for Cloudflare to redeploy. After deployment, the first Worker request checks the D1 schema version. If the version changed, runtime schema initialization runs automatically.
 
-用户更新项目时通常不需要手动跑 SQL。真正需要确认的是：
+Users usually do not need to run SQL manually. The real checks are:
 
-- Cloudflare 绑定仍然存在，例如 `DB`、`JWT_SECRET`、`NOTIFICATIONS_HUB`、`ATTACHMENTS` 或 `ATTACHMENTS_KV`。
-- `JWT_SECRET` 没有被重新生成。
-- 部署日志里没有 D1 初始化失败。
-- 大版本更新前已经做过一次可验证备份。
+- Cloudflare bindings still exist, such as `DB`, `JWT_SECRET`, `NOTIFICATIONS_HUB`, `ATTACHMENTS`, or `ATTACHMENTS_KV`.
+- `JWT_SECRET` was not regenerated.
+- Deployment logs do not show D1 initialization failures.
+- A verifiable backup exists before a major update.
 
-## 自动同步
+## Automatic upstream sync
 
-仓库包含同步上游的 GitHub Actions。可以在你自己的 Fork 里启用：
+The repository includes a GitHub Actions workflow for syncing upstream. You can enable it in your fork:
 
 ```text
 Actions -> Sync upstream -> Enable workflow
 ```
 
-启用后会按 workflow 配置定期同步。
+After it is enabled, the workflow runs on its configured schedule.
 
-`.github/workflows/sync-upstream.yml` 的行为分两种：
+`.github/workflows/sync-upstream.yml` has two modes:
 
-| 模式 | 触发方式 | 行为 |
+| Mode | Trigger | Behavior |
 | --- | --- | --- |
-| 自动计划 | 每天按 cron 运行 | 读取上游最新 release tag，如果当前 fork 还没包含该提交，就合并到 `main` 并 push。 |
-| 手动运行 | Actions 页面手动触发 | 如果填写 `target_commit`，会切到指定 commit 或 tag；如果留空，会使用 `upstream/main` 最新提交。 |
+| Scheduled | Daily cron | Reads the latest upstream release tag and merges it into `main` if the fork does not already contain that commit. |
+| Manual | Actions page | If `target_commit` is provided, checks out that commit or tag. If it is empty, uses the latest `upstream/main`. |
 
-手动模式允许升级也允许回滚，所以 workflow 会对 `main` 做 force push。只在你明确知道目标提交时使用。
+Manual mode can upgrade or roll back, so the workflow force-pushes `main`. Use it only when you know the target commit.
 
-这个 workflow 会在同步后恢复自己的 `.github/workflows/sync-upstream.yml`，避免被上游覆盖。它不负责更新用户 D1 数据，也不负责生成备份。
+After sync, the workflow restores its own `.github/workflows/sync-upstream.yml` so it is not overwritten by upstream. It does not update user D1 data and does not generate backups.
 
-## 全局域名规则同步
+## Global domain rule sync
 
-全局域名规则有独立 Action：`.github/workflows/sync-global-domains.yml`。
+Global equivalent domain rules have a separate Action: `.github/workflows/sync-global-domains.yml`.
 
-它只更新：
+It updates only:
 
 - `src/static/global_domains.bitwarden.json`
 - `src/static/global_domains.bitwarden.meta.json`
 
-它会检查 `src/static/global_domains.custom.json` 没有变化。NodeWarden 自己补充的全局域名规则应该由人工 PR 修改 `global_domains.custom.json`，不要混进自动同步生成文件。
+It also checks that `src/static/global_domains.custom.json` did not change. NodeWarden-specific global rules should be added by a manual PR to `global_domains.custom.json`, not mixed into generated Bitwarden sync output.
 
-详细规则见 [域名规则](/guide/core/domain-rules)。
+See [Domain Rules](/guide/core/domain-rules) for details.
 
-## 更新不会要求手动迁移
+## Updates do not require manual migrations
 
-项目的 D1 schema 初始化是运行时幂等执行的。`src/services/storage.ts` 里有 `STORAGE_SCHEMA_VERSION`，只要版本变化，Worker 会重新跑 `src/services/storage-schema.ts` 里的 SQL。
+The D1 schema initializer is idempotent and runs at runtime. `src/services/storage.ts` contains `STORAGE_SCHEMA_VERSION`. When that version changes, the Worker reruns SQL from `src/services/storage-schema.ts`.
 
-你需要关注的是：
+You need to watch for:
 
-- 部署日志里是否有数据库初始化失败。
-- 新版本是否新增了必要绑定。
-- 是否仍保留原来的 JWT_SECRET。
+- Database initialization failures in deployment logs.
+- New bindings required by the new version.
+- Whether the original `JWT_SECRET` is still present.
 
-如果你是贡献者，改 schema 时必须同时更新：
+If you are contributing schema changes, update all of these together:
 
 - `migrations/0001_init.sql`
 - `src/services/storage-schema.ts`
-- `src/services/storage.ts` 里的 `STORAGE_SCHEMA_VERSION`
+- `STORAGE_SCHEMA_VERSION` in `src/services/storage.ts`
 
-如果新增的是持久数据，还要继续检查 `backup-archive.ts`、`backup-import.ts` 和前端备份类型。否则新数据能写入，但备份无法完整恢复。
+If the new data is persistent, also check `backup-archive.ts`, `backup-import.ts`, and frontend backup types. Otherwise the data may be writable but not restorable from backups.
 
-## 更新前建议做备份
+## Back up before updating
 
-更新前建议在备份中心手动导出一次实例备份。密码库类项目的数据价值远高于部署本身，更新前应先确保存在可验证的恢复点。
+Before updating, run a manual instance export in the backup center. Vault data is more valuable than the deployment itself, so make sure you have a verifiable restore point.
 
-如果开启了远程定时备份，也建议手动点一次运行并确认成功。远程备份会记录最后成功时间、文件名、大小、路径和错误信息。
+If remote scheduled backups are enabled, it is still wise to run one manually and confirm success. Remote backups record the last success time, file name, size, path, and error details.
 
-## 不要做的事
+## What not to do
 
-- 不要删除 D1 数据库再部署，除非你准备从备份恢复。
-- 不要重置 JWT_SECRET。
-- 不要把 `backup.settings.v1` 当普通 JSON 手改，当前它可能是加密信封。
-- 不要手动清理 `attachments/` 目录下的远程备份附件，除非你确认没有任何备份 ZIP 还引用这些 blob。
-- 不要手改 `src/static/global_domains.bitwarden.json` 这类生成文件来提交长期规则。
+- Do not delete the D1 database and redeploy unless you are ready to restore from backup.
+- Do not reset `JWT_SECRET`.
+- Do not edit `backup.settings.v1` as plain JSON. It may be an encrypted envelope.
+- Do not manually clean the remote `attachments/` directory unless you have confirmed that no backup ZIP references those blobs.
+- Do not submit long-term rule changes by editing generated files such as `src/static/global_domains.bitwarden.json`.
