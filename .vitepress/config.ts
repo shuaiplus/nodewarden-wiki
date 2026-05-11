@@ -38,6 +38,7 @@ export default defineConfig({
           { text: '附件与文件存储', link: '/guide/core/attachments' },
           { text: 'Send 与公开访问', link: '/guide/core/send' },
           { text: '导入与导出', link: '/guide/core/import-export' },
+          { text: 'API 参考', link: '/guide/core/api-reference' },
           { text: '域名规则与图标', link: '/guide/core/domain-icons' }
         ]
       },
@@ -64,6 +65,8 @@ export default defineConfig({
         text: '架构与开发',
         items: [
           { text: '整体架构', link: '/guide/architecture/overview' },
+          { text: '后端路由与服务层', link: '/guide/architecture/backend-routing-services' },
+          { text: '前端架构', link: '/guide/architecture/frontend' },
           { text: '数据模型与迁移', link: '/guide/architecture/storage-schema' },
           { text: '兼容性策略', link: '/guide/architecture/compatibility' },
           { text: '开发与代码约定', link: '/guide/architecture/development' }
@@ -73,6 +76,7 @@ export default defineConfig({
         text: '运维排错',
         items: [
           { text: '常见问题', link: '/guide/operations/faq' },
+          { text: '限制与已知边界', link: '/guide/operations/limitations' },
           { text: '排错清单', link: '/guide/operations/troubleshooting' },
           { text: '备份事故处理', link: '/guide/operations/backup-incidents' }
         ]
