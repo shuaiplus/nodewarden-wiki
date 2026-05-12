@@ -43,16 +43,14 @@ NodeWarden 的代码里有几个长期原则：
 
 ## 阅读路径
 
-如果只是部署，先看：
+如果只是部署和使用 NodeWarden，先看：
 
-- [快速开始](/zh/guide/quick-start)
-- [配置与密钥](/zh/guide/deployment/configuration)
-- [常见问题](/zh/guide/operations/faq)
+- [入门路线](/zh/guide/start)
 
-如果要改代码，先看：
+如果已经部署好实例，正在做长期维护，先看：
 
-- [整体架构](/zh/guide/architecture/overview)
-- [后端路由与服务层](/zh/guide/architecture/backend-routing-services)
-- [前端架构](/zh/guide/architecture/frontend)
-- [变更维护地图](/zh/guide/architecture/change-map)
-- [开发与代码约定](/zh/guide/architecture/development)
+- [维护 NodeWarden](/zh/guide/operate)
+
+如果要改代码、审查技术行为或贡献补丁，先看：
+
+- [贡献者路线](/zh/guide/contribute)

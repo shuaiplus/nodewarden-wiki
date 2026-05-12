@@ -3,57 +3,61 @@ import { defineConfig, type DefaultTheme, type HeadConfig } from 'vitepress';
 const SITE_URL = 'https://nodewarden.app';
 
 const englishNav: DefaultTheme.NavItem[] = [
-  { text: 'Quick Start', link: '/guide/quick-start' },
-  { text: 'Backup Center', link: '/guide/backup/overview' },
-  { text: 'Architecture', link: '/guide/architecture/overview' },
+  { text: 'Start', link: '/guide/start' },
+  { text: 'Deploy', link: '/guide/deployment/cloudflare' },
+  { text: 'Backup & Restore', link: '/guide/operate' },
+  { text: 'Troubleshooting', link: '/guide/operations/troubleshooting' },
+  { text: 'Contributors', link: '/guide/contribute' },
   { text: 'Demo', link: 'https://demo.nodewarden.app/' }
 ];
 
 const chineseNav: DefaultTheme.NavItem[] = [
-  { text: '快速开始', link: '/zh/guide/quick-start' },
-  { text: '备份中心', link: '/zh/guide/backup/overview' },
-  { text: '架构设计', link: '/zh/guide/architecture/overview' },
+  { text: '入门', link: '/zh/guide/start' },
+  { text: '部署', link: '/zh/guide/deployment/cloudflare' },
+  { text: '备份与恢复', link: '/zh/guide/operate' },
+  { text: '排错', link: '/zh/guide/operations/troubleshooting' },
+  { text: '贡献者', link: '/zh/guide/contribute' },
   { text: 'Demo', link: 'https://demo.nodewarden.app/' }
 ];
 
 const englishSidebar: DefaultTheme.Sidebar = {
   '/guide/': [
     {
-      text: 'Getting Started',
+      text: 'Start Here',
       items: [
+        { text: 'Start Here', link: '/guide/start' },
         { text: 'Project Overview', link: '/guide/overview' },
         { text: 'Quick Start', link: '/guide/quick-start' },
-        { text: 'Cloudflare Settings', link: '/guide/deployment/cloudflare' },
+        { text: 'Cloudflare Deployment', link: '/guide/deployment/cloudflare' },
         { text: 'Configuration and Secrets', link: '/guide/deployment/configuration' },
-        { text: 'Updates and Maintenance', link: '/guide/deployment/update' },
-        { text: 'Client Connections', link: '/guide/core/clients' }
+        { text: 'Client Connections', link: '/guide/core/clients' },
+        { text: 'FAQ', link: '/guide/operations/faq' },
+        { text: 'Troubleshooting', link: '/guide/operations/troubleshooting' }
       ]
     },
     {
-      text: 'Core Features',
+      text: 'Operate an Instance',
+      items: [
+        { text: 'Operate NodeWarden', link: '/guide/operate' },
+        { text: 'Updates and Maintenance', link: '/guide/deployment/update' },
+        { text: 'Backup Overview', link: '/guide/backup/overview' },
+        { text: 'Backup Scope', link: '/guide/backup/scope' },
+        { text: 'Settings Encryption', link: '/guide/backup/settings-crypto' },
+        { text: 'Remote Backup Flow', link: '/guide/backup/remote-flow' },
+        { text: 'Restore and Validation', link: '/guide/backup/restore' },
+        { text: 'Backup Incidents', link: '/guide/operations/backup-incidents' },
+        { text: 'Limits and Boundaries', link: '/guide/operations/limitations' }
+      ]
+    },
+    {
+      text: 'Features and Security',
       items: [
         { text: 'Vault and Sync', link: '/guide/core/vault-sync' },
         { text: 'Attachments and Storage', link: '/guide/core/attachments' },
         { text: 'Send and Public Access', link: '/guide/core/send' },
         { text: 'Import and Export', link: '/guide/core/import-export' },
-        { text: 'API Reference', link: '/guide/core/api-reference' },
         { text: 'Domain Rules', link: '/guide/core/domain-rules' },
-        { text: 'Website Icons', link: '/guide/core/website-icons' }
-      ]
-    },
-    {
-      text: 'Backup Center',
-      items: [
-        { text: 'Backup Overview', link: '/guide/backup/overview' },
-        { text: 'Backup Scope', link: '/guide/backup/scope' },
-        { text: 'Settings Encryption', link: '/guide/backup/settings-crypto' },
-        { text: 'Remote Backup Flow', link: '/guide/backup/remote-flow' },
-        { text: 'Restore and Validation', link: '/guide/backup/restore' }
-      ]
-    },
-    {
-      text: 'Security Design',
-      items: [
+        { text: 'Website Icons', link: '/guide/core/website-icons' },
         { text: 'Accounts and Master Passwords', link: '/guide/security/accounts' },
         { text: 'JWT and Sessions', link: '/guide/security/jwt-session' },
         { text: 'Two-Step Login and Devices', link: '/guide/security/two-factor-devices' },
@@ -61,25 +65,18 @@ const englishSidebar: DefaultTheme.Sidebar = {
       ]
     },
     {
-      text: 'Architecture and Development',
+      text: 'Contributors',
       items: [
+        { text: 'Contributor Guide', link: '/guide/contribute' },
         { text: 'Architecture Overview', link: '/guide/architecture/overview' },
         { text: 'Backend Routes and Services', link: '/guide/architecture/backend-routing-services' },
         { text: 'Frontend Architecture', link: '/guide/architecture/frontend' },
         { text: 'Storage Schema', link: '/guide/architecture/storage-schema' },
         { text: 'Compatibility Strategy', link: '/guide/architecture/compatibility' },
         { text: 'Realtime Notifications', link: '/guide/architecture/realtime-notifications' },
+        { text: 'API Reference', link: '/guide/core/api-reference' },
         { text: 'Change Map', link: '/guide/architecture/change-map' },
         { text: 'Development Conventions', link: '/guide/architecture/development' }
-      ]
-    },
-    {
-      text: 'Operations',
-      items: [
-        { text: 'FAQ', link: '/guide/operations/faq' },
-        { text: 'Limits and Boundaries', link: '/guide/operations/limitations' },
-        { text: 'Troubleshooting', link: '/guide/operations/troubleshooting' },
-        { text: 'Backup Incidents', link: '/guide/operations/backup-incidents' }
       ]
     }
   ]
@@ -88,41 +85,41 @@ const englishSidebar: DefaultTheme.Sidebar = {
 const chineseSidebar: DefaultTheme.Sidebar = {
   '/zh/guide/': [
     {
-      text: '基础教程',
+      text: '先从这里开始',
       items: [
+        { text: '入门路线', link: '/zh/guide/start' },
         { text: '项目定位', link: '/zh/guide/overview' },
-        { text: '快速开始', link: '/zh/guide/quick-start' },
+        { text: '快速部署', link: '/zh/guide/quick-start' },
         { text: 'Cloudflare 参数', link: '/zh/guide/deployment/cloudflare' },
         { text: '配置与密钥', link: '/zh/guide/deployment/configuration' },
-        { text: '更新与维护', link: '/zh/guide/deployment/update' },
-        { text: '客户端连接', link: '/zh/guide/core/clients' }
+        { text: '客户端连接', link: '/zh/guide/core/clients' },
+        { text: '常见问题', link: '/zh/guide/operations/faq' },
+        { text: '排错清单', link: '/zh/guide/operations/troubleshooting' }
       ]
     },
     {
-      text: '核心功能',
+      text: '维护实例',
+      items: [
+        { text: '维护路线', link: '/zh/guide/operate' },
+        { text: '更新与维护', link: '/zh/guide/deployment/update' },
+        { text: '备份能力总览', link: '/zh/guide/backup/overview' },
+        { text: '备份内容边界', link: '/zh/guide/backup/scope' },
+        { text: '配置加密设计', link: '/zh/guide/backup/settings-crypto' },
+        { text: '远程备份流程', link: '/zh/guide/backup/remote-flow' },
+        { text: '还原与校验', link: '/zh/guide/backup/restore' },
+        { text: '备份事故处理', link: '/zh/guide/operations/backup-incidents' },
+        { text: '限制与边界', link: '/zh/guide/operations/limitations' }
+      ]
+    },
+    {
+      text: '功能与安全',
       items: [
         { text: '密码库与同步', link: '/zh/guide/core/vault-sync' },
         { text: '附件与文件存储', link: '/zh/guide/core/attachments' },
         { text: 'Send 与公开访问', link: '/zh/guide/core/send' },
         { text: '导入与导出', link: '/zh/guide/core/import-export' },
-        { text: 'API 参考', link: '/zh/guide/core/api-reference' },
         { text: '域名规则', link: '/zh/guide/core/domain-rules' },
-        { text: '网站图标', link: '/zh/guide/core/website-icons' }
-      ]
-    },
-    {
-      text: '备份中心',
-      items: [
-        { text: '备份能力总览', link: '/zh/guide/backup/overview' },
-        { text: '备份内容边界', link: '/zh/guide/backup/scope' },
-        { text: '配置加密设计', link: '/zh/guide/backup/settings-crypto' },
-        { text: '远程备份流程', link: '/zh/guide/backup/remote-flow' },
-        { text: '还原与校验', link: '/zh/guide/backup/restore' }
-      ]
-    },
-    {
-      text: '安全设计',
-      items: [
+        { text: '网站图标', link: '/zh/guide/core/website-icons' },
         { text: '账号与主密码', link: '/zh/guide/security/accounts' },
         { text: 'JWT 与会话', link: '/zh/guide/security/jwt-session' },
         { text: '两步验证与设备', link: '/zh/guide/security/two-factor-devices' },
@@ -130,25 +127,18 @@ const chineseSidebar: DefaultTheme.Sidebar = {
       ]
     },
     {
-      text: '架构与开发',
+      text: '贡献者',
       items: [
+        { text: '贡献者路线', link: '/zh/guide/contribute' },
         { text: '整体架构', link: '/zh/guide/architecture/overview' },
         { text: '后端路由与服务层', link: '/zh/guide/architecture/backend-routing-services' },
         { text: '前端架构', link: '/zh/guide/architecture/frontend' },
         { text: '数据模型与迁移', link: '/zh/guide/architecture/storage-schema' },
         { text: '兼容性策略', link: '/zh/guide/architecture/compatibility' },
         { text: '实时通知', link: '/zh/guide/architecture/realtime-notifications' },
+        { text: 'API 参考', link: '/zh/guide/core/api-reference' },
         { text: '变更维护地图', link: '/zh/guide/architecture/change-map' },
         { text: '开发与代码约定', link: '/zh/guide/architecture/development' }
-      ]
-    },
-    {
-      text: '运维排错',
-      items: [
-        { text: '常见问题', link: '/zh/guide/operations/faq' },
-        { text: '限制与边界', link: '/zh/guide/operations/limitations' },
-        { text: '排错清单', link: '/zh/guide/operations/troubleshooting' },
-        { text: '备份事故处理', link: '/zh/guide/operations/backup-incidents' }
       ]
     }
   ]
@@ -156,6 +146,9 @@ const chineseSidebar: DefaultTheme.Sidebar = {
 
 const descriptions: Record<string, string> = {
   'index.md': 'NodeWarden documentation for deploying, operating, backing up, and developing a Bitwarden-compatible server running on Cloudflare Workers.',
+  'guide/start.md': 'A beginner-friendly reading path for deploying NodeWarden, connecting Bitwarden clients, and finding the right troubleshooting pages without reading contributor docs first.',
+  'guide/operate.md': 'A focused operations path for maintaining a deployed NodeWarden instance, including updates, backups, restores, incidents, and platform limits.',
+  'guide/contribute.md': 'A contributor reading path for understanding NodeWarden architecture, storage, compatibility, APIs, frontend code, and safe development conventions.',
   'guide/overview.md': 'Understand what NodeWarden is, who it is for, which Bitwarden-compatible features it supports, and which enterprise features are intentionally out of scope.',
   'guide/quick-start.md': 'Deploy NodeWarden on Cloudflare Workers, choose R2 or KV storage, configure JWT_SECRET, register the first administrator, and run your first backup.',
   'guide/deployment/cloudflare.md': 'Cloudflare Workers, D1, R2, KV, Durable Object, assets, cron, and binding details required to run NodeWarden.',
@@ -194,6 +187,9 @@ const descriptions: Record<string, string> = {
 
 const zhDescriptions: Record<string, string> = {
   'zh/index.md': 'NodeWarden 中文文档，介绍 Cloudflare Workers 上的 Bitwarden 兼容服务端部署、备份、安全、架构和维护方式。',
+  'zh/guide/start.md': 'NodeWarden 新手阅读路线，帮助用户完成部署、连接客户端，并快速找到排错文档，不需要先读贡献者内容。',
+  'zh/guide/operate.md': 'NodeWarden 实例维护路线，覆盖更新、备份、恢复、备份事故和 Cloudflare 平台限制。',
+  'zh/guide/contribute.md': 'NodeWarden 贡献者阅读路线，覆盖架构、存储、兼容性、API、前端和安全开发约定。',
   'zh/guide/overview.md': '了解 NodeWarden 的项目定位、适用人群、支持能力、设计原则，以及和 Vaultwarden 的差异。',
   'zh/guide/quick-start.md': '快速部署 NodeWarden，选择 R2 或 KV 存储，配置 JWT_SECRET，完成首次管理员注册和备份准备。',
   'zh/guide/deployment/cloudflare.md': 'NodeWarden 在 Cloudflare Workers、D1、R2、KV、Durable Object、静态资源和 cron 上的部署参数。',
@@ -327,11 +323,7 @@ export default defineConfig({
     },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/shuaiplus/NodeWarden' }
-    ],
-    footer: {
-      message: 'Released under the LGPL-3.0 License.',
-      copyright: 'Copyright © 2026 NodeWarden'
-    }
+    ]
   },
   locales: {
     root: {
@@ -362,11 +354,7 @@ export default defineConfig({
         langMenuLabel: '切换语言',
         returnToTopLabel: '回到顶部',
         sidebarMenuLabel: '菜单',
-        darkModeSwitchLabel: '外观',
-        footer: {
-          message: 'Released under the LGPL-3.0 License.',
-          copyright: 'Copyright © 2026 NodeWarden'
-        }
+        darkModeSwitchLabel: '外观'
       }
     }
   }

@@ -43,16 +43,14 @@ NodeWarden follows several long-term principles:
 
 ## Reading path
 
-If you only want to deploy, start with:
+If you only want to deploy and use NodeWarden, start with:
 
-- [Quick Start](/guide/quick-start)
-- [Configuration and Secrets](/guide/deployment/configuration)
-- [FAQ](/guide/operations/faq)
+- [Start Here](/guide/start)
 
-If you plan to change code, start with:
+If you already run an instance and need maintenance material, use:
 
-- [Architecture Overview](/guide/architecture/overview)
-- [Backend Routes and Services](/guide/architecture/backend-routing-services)
-- [Frontend Architecture](/guide/architecture/frontend)
-- [Change Map](/guide/architecture/change-map)
-- [Development Conventions](/guide/architecture/development)
+- [Operate NodeWarden](/guide/operate)
+
+If you plan to change code, review technical behavior, or contribute patches, use:
+
+- [Contribute to NodeWarden](/guide/contribute)

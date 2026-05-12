@@ -1,4 +1,4 @@
-# 快速开始
+# 快速部署
 
 想先看界面，可以打开 [NodeWarden 在线 Demo](https://demo.nodewarden.app/)
 - Demo 只用于体验网页端交互，不会保存真实数据。
