@@ -291,8 +291,8 @@ Passkey credentials 存储在 `webauthn_credentials` 表：
 
 - [账户安全](../security/accounts.md)
 - [双因素认证](../security/two-factor-devices.md)
-- [离线使用](./offline-usage.md#passkey-prf-解锁)
-- [Passkey 实现架构](../../architecture/passkey-implementation.md)
+- [离线使用](../client/offline-usage.md#passkey-prf-解锁)
+- [前端架构](../architecture/frontend.md)
 
 ## 参考资料
 

@@ -166,7 +166,7 @@ NodeWarden uses Web Workers to process vault decryption in background threads:
 3. Worker returns decrypted vault data
 4. Main thread updates UI
 
-See [Frontend Architecture - Web Worker](../../architecture/frontend.md#web-worker) for details.
+See [Frontend Architecture - Web Worker](../architecture/frontend.md#web-worker) for details.
 
 ## Troubleshooting
 

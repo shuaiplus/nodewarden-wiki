@@ -166,7 +166,7 @@ NodeWarden 使用 Web Worker 在后台线程处理保险库解密：
 3. Worker 返回解密后的保险库数据
 4. 主线程更新 UI
 
-详见 [前端架构 - Web Worker](../../architecture/frontend.md#web-worker)。
+详见 [前端架构 - Web Worker](../architecture/frontend.md#web-worker)。
 
 ## 故障排除
 

@@ -101,7 +101,7 @@ NodeWarden PWA 使用以下技术：
 - **Cache API** - 管理静态资源和 API 响应缓存
 - **IndexedDB** - 存储保险库数据和离线解锁记录
 
-相关架构文档：[前端架构](../../architecture/frontend.md)
+相关架构文档：[前端架构](../architecture/frontend.md)
 
 ## 常见问题
 

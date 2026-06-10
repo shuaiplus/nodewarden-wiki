@@ -291,8 +291,8 @@ See [API Reference](../core/api-reference.md) for details.
 
 - [Account Security](../security/accounts.md)
 - [Two-Factor Authentication](../security/two-factor-devices.md)
-- [Offline Usage](./offline-usage.md#passkey-prf-unlock)
-- [Passkey Implementation Architecture](../../architecture/passkey-implementation.md)
+- [Offline Usage](../client/offline-usage.md#passkey-prf-unlock)
+- [Frontend Architecture](../architecture/frontend.md)
 
 ## References
 

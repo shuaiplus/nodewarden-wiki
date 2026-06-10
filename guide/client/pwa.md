@@ -101,7 +101,7 @@ NodeWarden PWA uses the following technologies:
 - **Cache API** - Manages static resources and API response caching
 - **IndexedDB** - Stores vault data and offline unlock records
 
-Related architecture docs: [Frontend Architecture](../../architecture/frontend.md)
+Related architecture docs: [Frontend Architecture](../architecture/frontend.md)
 
 ## FAQ
 
