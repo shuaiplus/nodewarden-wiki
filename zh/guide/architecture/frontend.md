@@ -16,6 +16,38 @@ NodeWarden 的网页密码库是仓库内自研的 Vite + Preact 应用，不依
 
 构建入口是 `webapp/vite.config.ts`。生产构建输出到根目录 `dist/`，再由 Worker assets 提供静态资源。
 
+## PWA 与离线支持
+
+NodeWarden 网页密码库是渐进式 Web 应用，具备离线能力：
+
+**Service Worker:**
+- Vite 构建时生成（`webapp/vite.config.ts`）
+- 预缓存应用外壳（HTML、CSS、JS）
+- 运行时缓存静态资源和 API 响应
+- Network-first 策略，离线时回退缓存
+
+**离线存储:**
+- **IndexedDB**（`lib/vault-cache.ts`）- 缓存保险库数据（密码项、文件夹、Send）
+- **localStorage**（`lib/offline-auth.ts`）- 离线解锁记录，含加密 profile key
+- **Cache API** - Service Worker 管理的资源缓存
+
+**Web Worker:**
+- 后台保险库解密（`workers/vault-decrypt.worker.ts`）
+- 非阻塞密钥派生和密码项解密
+- 大型保险库操作时保持 UI 响应
+
+**网络检测:**
+- 主动探测（`lib/network-status.ts`），3.5秒超时
+- 自动离线/在线状态管理
+- 结果缓存 5 秒，避免频繁请求
+
+**PWA Manifest:**
+- 可安装应用，带快捷方式（`public/manifest.webmanifest`）
+- 独立显示模式
+- 快速操作：打开保险库、TOTP 代码
+
+用户文档参见 [PWA 功能](../client/pwa.md) 和 [离线使用](../client/offline-usage.md)。
+
 ## App 总控
 
 `webapp/src/App.tsx` 是前端总控层，负责 session、登录注册、锁定解锁、全局查询、通知连接、管理员能力、备份能力和主路由分发。

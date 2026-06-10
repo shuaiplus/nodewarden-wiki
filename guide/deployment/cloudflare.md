@@ -39,6 +39,7 @@ crons = [ "*/5 * * * *" ]
 [[d1_databases]]
 binding = "DB"
 database_name = "nodewarden-db"
+database_id = "00000000-0000-0000-0000-000000000000"
 
 [[durable_objects.bindings]]
 name = "NOTIFICATIONS_HUB"
@@ -73,6 +74,11 @@ NodeWarden does not require you to run SQL manually. When the Worker handles its
 The initializer creates the `config` table first, then reads `config.schema.version`. If the version changed, it runs idempotent SQL and writes the new version back.
 
 After an update, existing instances automatically fill in missing tables, columns, and indexes as long as the schema version was changed correctly.
+
+The checked-in `database_id` is a placeholder that keeps Wrangler config parsing
+working before login. `npm run deploy` and `npm run deploy:kv` run
+`scripts/ensure-d1.cjs`, which reuses or creates the `nodewarden-db` D1 database
+and writes the real id back into the selected Wrangler config.
 
 ## R2 deployment
 

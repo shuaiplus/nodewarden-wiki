@@ -10,6 +10,7 @@
 | --- | --- |
 | `config` | 普通配置行，以及便携化后的 `backup.settings.v1`。 |
 | `users` | 用户、主密码验证 hash、加密用户 key、加密私钥、公钥、KDF、角色、状态、TOTP 信息等。 |
+| `webauthn_credentials` | 账户 Passkey 凭证，包括公钥、credential ID、计数器、PRF 支持标志和用于保险库解锁的加密 PRF 密钥集。 |
 | `domain_settings` | 用户等效域名、自定义域名规则、排除的全局域名规则。 |
 | `user_revisions` | 每个用户的同步 revision date。 |
 | `folders` | 文件夹。 |

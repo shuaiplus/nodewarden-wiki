@@ -10,6 +10,7 @@ Instance backups export these tables or fields:
 | --- | --- |
 | `config` | Regular config rows and portable `backup.settings.v1`. |
 | `users` | Users, master password verification hashes, encrypted user keys, encrypted private keys, public keys, KDF, role, status, TOTP data, and related fields. |
+| `webauthn_credentials` | Account Passkey credentials including public keys, credential IDs, counters, PRF support flags, and encrypted PRF keysets for vault unlock. |
 | `domain_settings` | User equivalent domains, custom domain rules, and excluded global domain rules. |
 | `user_revisions` | Per-user sync revision dates. |
 | `folders` | Folders. |
