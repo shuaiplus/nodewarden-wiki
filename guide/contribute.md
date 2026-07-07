@@ -2,6 +2,10 @@
 
 This path is for people who want to modify NodeWarden or review technical changes. If you only want to deploy an instance, start with [Start Here](/guide/start) instead.
 
+## Documentation (this wiki)
+
+Wiki source is **[nodewarden-wiki on GitHub](https://github.com/shuaiplus/nodewarden-wiki)** — not the main NodeWarden app repository. Typos and outdated pages: edit via **Edit this page on GitHub** or open an issue there. See [FAQ — wiki mistakes](/guide/operations/faq#i-found-a-mistake-in-this-wiki-how-do-i-report-it).
+
 ## Architecture path
 
 1. [Architecture Overview](/guide/architecture/overview) - see how the Worker, frontend assets, APIs, D1, R2, KV, cron, and Durable Object notifications fit together.

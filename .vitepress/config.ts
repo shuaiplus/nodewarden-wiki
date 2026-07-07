@@ -1,6 +1,8 @@
 import { defineConfig, type DefaultTheme, type HeadConfig } from 'vitepress';
 
 const SITE_URL = 'https://nodewarden.app';
+const WIKI_REPO = 'https://github.com/shuaiplus/nodewarden-wiki';
+const WIKI_EDIT_BRANCH = 'master';
 
 const englishNav: DefaultTheme.NavItem[] = [
   { text: 'Start', link: '/guide/start' },
@@ -8,6 +10,7 @@ const englishNav: DefaultTheme.NavItem[] = [
   { text: 'Backup & Restore', link: '/guide/operate' },
   { text: 'Troubleshooting', link: '/guide/operations/troubleshooting' },
   { text: 'Contributors', link: '/guide/contribute' },
+  { text: 'Wiki repo', link: WIKI_REPO },
   { text: 'Demo', link: 'https://demo.nodewarden.app/' }
 ];
 
@@ -17,6 +20,7 @@ const chineseNav: DefaultTheme.NavItem[] = [
   { text: '备份与恢复', link: '/zh/guide/operate' },
   { text: '排错', link: '/zh/guide/operations/troubleshooting' },
   { text: '贡献者', link: '/zh/guide/contribute' },
+  { text: 'Wiki 仓库', link: WIKI_REPO },
   { text: 'Demo', link: 'https://demo.nodewarden.app/' }
 ];
 
@@ -335,9 +339,17 @@ export default defineConfig({
     search: {
       provider: 'local'
     },
+    editLink: {
+      pattern: `${WIKI_REPO}/edit/${WIKI_EDIT_BRANCH}/:path`,
+      text: 'Edit this page on GitHub'
+    },
     socialLinks: [
       { icon: 'github', link: 'https://github.com/shuaiplus/NodeWarden' }
-    ]
+    ],
+    footer: {
+      message: 'Documentation source',
+      copyright: `Wiki: <a href="${WIKI_REPO}">nodewarden-wiki</a> · App: <a href="https://github.com/shuaiplus/NodeWarden">NodeWarden</a>`
+    }
   },
   locales: {
     root: {
@@ -368,7 +380,15 @@ export default defineConfig({
         langMenuLabel: '切换语言',
         returnToTopLabel: '回到顶部',
         sidebarMenuLabel: '菜单',
-        darkModeSwitchLabel: '外观'
+        darkModeSwitchLabel: '外观',
+        editLink: {
+          pattern: `${WIKI_REPO}/edit/${WIKI_EDIT_BRANCH}/:path`,
+          text: '在 GitHub 上编辑此页'
+        },
+        footer: {
+          message: '文档仓库',
+          copyright: `Wiki：<a href="${WIKI_REPO}">nodewarden-wiki</a> · 应用：<a href="https://github.com/shuaiplus/NodeWarden">NodeWarden</a>`
+        }
       }
     }
   }

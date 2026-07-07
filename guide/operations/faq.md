@@ -33,3 +33,11 @@ During first registration, if the `users` table is empty, the server assigns the
 ## Should I report NodeWarden issues to Bitwarden?
 
 No. NodeWarden is an independent project and is not affiliated with Bitwarden. Report NodeWarden issues in the NodeWarden project.
+
+## I found a mistake in this wiki. How do I report it?
+
+Documentation lives in a separate repository: [github.com/shuaiplus/nodewarden-wiki](https://github.com/shuaiplus/nodewarden-wiki).
+
+- **Quick fix:** On any page, use **Edit this page on GitHub** (top right) and open a pull request.
+- **Discussion:** Open an [Issue](https://github.com/shuaiplus/nodewarden-wiki/issues) with the page URL and what is wrong.
+- **Product bugs** (login, sync, backup, clients): use [NodeWarden Issues](https://github.com/shuaiplus/NodeWarden/issues), not the wiki repo.

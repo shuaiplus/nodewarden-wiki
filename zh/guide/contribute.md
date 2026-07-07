@@ -2,6 +2,10 @@
 
 这条路线给想修改 NodeWarden 或审查技术改动的人看。如果你只是要部署一个实例，请先看 [入门路线](/zh/guide/start)。
 
+## 文档（本站 wiki）
+
+文档源码在 **[GitHub：nodewarden-wiki](https://github.com/shuaiplus/nodewarden-wiki)**，与主应用仓库分开。错字、过时说明：用页面右上角 **在 GitHub 上编辑此页** 或到该仓库开 Issue。见 [常见问题 — 文档写错了](/zh/guide/operations/faq#文档写错了怎么反馈)。
+
 ## 架构路线
 
 1. [整体架构](/zh/guide/architecture/overview) - 理解 Worker、前端资源、API、D1、R2、KV、cron 和 Durable Object 通知层如何组合。

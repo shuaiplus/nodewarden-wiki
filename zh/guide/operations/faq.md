@@ -32,5 +32,13 @@ Cloudflare KV 单对象有大小限制。NodeWarden 在 KV 模式下会把附件
 
 ## 可以向 Bitwarden 官方反馈 NodeWarden 的问题吗
 
-不要。NodeWarden 是独立项目，和 Bitwarden 官方无关。遇到问题应该在 NodeWarden 项目内反馈。
+不要。NodeWarden 是独立项目，和 Bitwarden 官方无关。产品问题请在 [NodeWarden Issues](https://github.com/shuaiplus/NodeWarden/issues) 反馈。
+
+## 文档写错了怎么反馈？
+
+本站文档在独立仓库：[github.com/shuaiplus/nodewarden-wiki](https://github.com/shuaiplus/nodewarden-wiki)。
+
+- **直接改：** 页面右上角 **在 GitHub 上编辑此页**，改完提 Pull Request。
+- **不方便改：** 在 wiki 仓库开 [Issue](https://github.com/shuaiplus/nodewarden-wiki/issues)，写上页面链接和错误说明。
+- **程序 Bug**（登录、同步、备份、客户端）：请用 NodeWarden 主仓库 Issue，不要开在 wiki 仓库。
 
