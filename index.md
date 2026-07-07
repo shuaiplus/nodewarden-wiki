@@ -4,7 +4,7 @@ layout: home
 hero:
   name: NodeWarden
   text: Bitwarden-compatible server running on Cloudflare Workers
-  tagline: Includes a Web Vault, attachments, Send, import and export, cloud backups, and compatibility paths for official clients.
+  tagline: v1.7.3 — Web Vault, login requests, 2FA (TOTP/YubiKey/passkey), attachments, Send, backups, and official client compatibility on Cloudflare Workers.
   image:
     src: /nodewarden-logo.svg
     alt: NodeWarden

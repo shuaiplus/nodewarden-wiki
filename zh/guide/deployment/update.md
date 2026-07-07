@@ -2,6 +2,8 @@
 
 NodeWarden 的更新重点是保持代码、D1 schema、前端资源和 JWT_SECRET 稳定。
 
+各版本变更仅在 GitHub 的 [RELEASE_NOTES.md](https://github.com/shuaiplus/NodeWarden/blob/main/RELEASE_NOTES.md) 维护，wiki 不再单独写版本说明。
+
 ## Fork 用户要做什么
 
 如果你 Fork 了仓库，在 GitHub 页面点击：
@@ -19,37 +21,28 @@ Sync fork -> Update branch
 - 部署日志里没有 D1 初始化失败。
 - 大版本更新前已经做过一次可验证备份。
 
-## 自动同步
+## 仓库里的 GitHub Actions
 
-仓库包含同步上游的 GitHub Actions。可以在你自己的 Fork 里启用：
+主仓库当前只有 **三个** workflow（`.github/workflows/`）。它们**不能代替**你在 GitHub 上对 fork 点的 **Sync fork → Update branch**；普通用户仍靠 fork 同步拉新版本。
 
-```text
-Actions -> Sync upstream -> Enable workflow
+| 文件 | Actions 里显示名称 | 触发 | 作用 |
+| --- | --- | --- | --- |
+| `codeql.yml` | CodeQL Advanced | 任意分支 push | CodeQL 分析 Actions 与 JS/TS（`security-extended`、`security-and-quality`）。 |
+| `security-extra.yml` | Extra Security Scan | 任意分支 push | Gitleaks 密钥扫描（摘要与 artifact）+ OSV 依赖扫描（上传 SARIF，有漏洞则失败）。 |
+| `sync-global-domains.yml` | Sync Bitwarden global domains | 每周一 cron 或手动 | 执行 `npm run domains:sync`，只改 `global_domains.bitwarden.json` 与 `.meta.json`，校验 `global_domains.custom.json` 未动，并开 PR。手动可填 `bitwarden_ref`（运行前会校验）。 |
+
+旧文档里的 **Sync upstream**（`sync-upstream.yml`）**已不在当前仓库**。Fork 维护者请从 [shuaiplus/NodeWarden](https://github.com/shuaiplus/NodeWarden) 用 GitHub fork 同步或自己的 git 流程更新。
+
+### 全局域名规则同步（维护者）
+
+细节见 [域名规则](/zh/guide/core/domain-rules)。本地等价命令：
+
+```powershell
+npm run domains:sync
+npm run domains:sync -- --ref main
 ```
 
-启用后会按 workflow 配置定期同步。
-
-`.github/workflows/sync-upstream.yml` 的行为分两种：
-
-| 模式 | 触发方式 | 行为 |
-| --- | --- | --- |
-| 自动计划 | 每天按 cron 运行 | 读取上游最新 release tag，如果当前 fork 还没包含该提交，就合并到 `main` 并 push。 |
-| 手动运行 | Actions 页面手动触发 | 如果填写 `target_commit`，会切到指定 commit 或 tag；如果留空，会使用 `upstream/main` 最新提交。 |
-
-手动模式允许升级也允许回滚，所以 workflow 会对 `main` 做 force push。只在你明确知道目标提交时使用。
-
-这个 workflow 会在同步后恢复自己的 `.github/workflows/sync-upstream.yml`，避免被上游覆盖。它不负责更新用户 D1 数据，也不负责生成备份。
-
-## 全局域名规则同步
-
-全局域名规则有独立 Action：`.github/workflows/sync-global-domains.yml`。
-
-它只更新：
-
-- `src/static/global_domains.bitwarden.json`
-- `src/static/global_domains.bitwarden.meta.json`
-
-它会检查 `src/static/global_domains.custom.json` 没有变化。NodeWarden 自己补充的全局域名规则应该由人工 PR 修改 `global_domains.custom.json`，不要混进自动同步生成文件。
+`npm run deploy:kv` 会在 `wrangler deploy` 前执行 `scripts/ensure-kv.cjs`，确保 KV 命名空间绑定存在。
 
 详细规则见 [域名规则](/zh/guide/core/domain-rules)。
 

@@ -24,7 +24,7 @@ NodeWarden 运行在 Cloudflare Workers 上，受平台限制影响：
 - 企业目录同步
 - 组织事件日志
 - 企业管理员密码重置
-- 邮件发送式验证、邀请或密码提示流程。
+- 邮件发送式验证、邀请或密码提示流程（相关 API 可能返回明确的**不支持**）
 
 部分相关 API 会返回空列表，这是为了让个人密码库客户端流程继续走完，不代表功能可用。
 
@@ -32,12 +32,16 @@ NodeWarden 运行在 Cloudflare Workers 上，受平台限制影响：
 
 | 能力 | 当前边界 |
 | --- | --- |
-| 登录 2FA | 支持用户级 TOTP、记住设备和恢复码；不覆盖官方所有 2FA provider。 |
+| 登录 2FA | 用户级 **TOTP**、**YubiKey OTP**、**通行密钥 2FA**、记住设备、恢复码；不覆盖官方所有 2FA provider。 |
+| Passkey 登录 | 账户级 WebAuthn/FIDO2 登录与可选保险库解锁（PRF）。见 [Passkey 登录](/zh/guide/security/passkey-login)。 |
+| 登录请求 | 批准/拒绝免密与跨设备流程；见 [登录请求](/zh/guide/core/login-requests)。 |
 | 通知 | 提供 Durable Object 通知中心，但不同客户端仍应以 `/api/sync` 为最终一致来源。 |
-| API Key 登录 | 支持个人 API Key 的 `client_credentials` 登录；API Key 只负责认证，不能替代主密码解锁密码库。 |
-| Passkey / FIDO2 字段 | 保留和展示密码项中的 FIDO2 兼容字段；不等同于完整账号级 WebAuthn 登录。 |
-| 网站图标 | 通过两个上游图标源顺序代理，可能超时、缺失或回退到本地图标；细节见 [网站图标](/zh/guide/core/website-icons)。 |
-| 远程备份 | 支持 WebDAV 与 S3 兼容存储；具体稳定性仍取决于服务商的 WebDAV/S3 行为。 |
+| API Key 登录 | 支持个人 API Key 的 `client_credentials`；服务端以哈希存储密钥；不能替代主密码解锁密码库。 |
+| 扩展条目类型 | 银行账户、驾驶证、护照、SSH、FIDO2 等；须满足 EncString 校验。 |
+| 条目 TOTP | 贴近 Bitwarden 的 TOTP 与 `steam://` URI。 |
+| 网站图标 | **默认始终开启**；代理上游并限制隐私。见 [网站图标](/zh/guide/core/website-icons)。已移除 `WEBSITE_ICONS_ENABLED`。 |
+| 远程备份 | WebDAV/S3（R2、B2、Tigris 预设）；完整恢复有导入锁与 ZIP 校验和。 |
+| Fill-assist | `POST /fill-assist` 辅助自动填充；不能绕过保险库解锁。 |
 
 ## 安全边界
 

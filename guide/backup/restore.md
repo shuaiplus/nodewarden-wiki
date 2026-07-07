@@ -21,6 +21,10 @@ The last 5 characters are the first 5 characters of the ZIP SHA-256. During impo
 
 Administrators can choose to allow a hash mismatch, but the decision is written to the audit log as `checksumMismatchAccepted`.
 
+## Import lock (v1.7.2+)
+
+Full instance restore acquires an **exclusive import lock** so two administrators cannot apply conflicting restores at the same time. If a lock is already held, the API returns an error explaining that a restore is in progress.
+
 ## ZIP parsing
 
 `parseBackupArchive()` checks:

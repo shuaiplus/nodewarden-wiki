@@ -2,6 +2,21 @@
 
 If you have not yet identified which files a change touches, start with the [Change Map](/guide/architecture/change-map). This page lists commands and local rules; cross-layer impact should be reasoned from the change map.
 
+## npm scripts and `scripts/`
+
+| npm script | Purpose | Underlying script / notes |
+| --- | --- | --- |
+| `dev` / `dev:kv` | Local Worker + webapp | `wrangler dev` with `wrangler.toml` or `wrangler.kv.toml`. |
+| `dev:demo` | Demo webapp only | Vite on port 5174, `demo` mode. |
+| `build` | Production frontend | Vite → `dist/` for Worker assets. |
+| `build:demo` | Demo static site | Vite demo build + `scripts/pages-spa-redirects.cjs`. |
+| `deploy` / `deploy:kv` | Publish Worker | `deploy:kv` runs `scripts/ensure-kv.cjs` first. |
+| `deploy:demo` | Pages demo | `build:demo` then `wrangler pages deploy`. |
+| `domains:sync` | Refresh Bitwarden global domains | `scripts/sync-global-domains.mjs` (`--ref` optional). |
+| `i18n` / `i18n:validate` | Locale completeness | `scripts/i18n-validate.cjs` (uses `i18n-utils.cjs`). |
+
+There is no `sync-upstream` npm script; fork sync is a GitHub/git operation.
+
 ## Recommended checks
 
 Backend or shared code:
@@ -22,7 +37,7 @@ npm run build
 Wiki:
 
 ```powershell
-cd wiki
+cd nodewarden-wiki
 npm run build
 ```
 

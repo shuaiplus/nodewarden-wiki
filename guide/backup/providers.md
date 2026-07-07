@@ -55,6 +55,14 @@ Cost-effective S3-compatible storage.
 
 **Pricing:** First 10GB free, $0.005/GB/month thereafter
 
+The backup center UI includes **preset hints** for B2, R2, and **Tigris** (v1.7.2+), including endpoint and storage-class notes in supported languages.
+
+---
+
+### Tigris (S3 Compatible)
+
+S3-compatible object storage often used for low-latency global buckets. Configure like any S3 target; use the in-app preset for recommended endpoint patterns.
+
 ---
 
 ## Comparison Table
@@ -65,6 +73,7 @@ Cost-effective S3-compatible storage.
 | Google Drive (Koofr) | WebDAV | 15GB | Existing Google users |
 | Cloudflare R2 | S3 | 10GB/month | NodeWarden on Cloudflare |
 | Backblaze B2 | S3 | 10GB | Cost-conscious users |
+| Tigris | S3 | (provider) | S3-native global buckets |
 
 ## Related Documentation
 

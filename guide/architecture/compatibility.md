@@ -36,6 +36,10 @@ The code intentionally keeps several fields needed by Android clients:
 - Non-empty attachment `url`.
 - 2FA recovery-code provider compatibility across historical values.
 
+## Extended cipher types
+
+The Web Vault and `/api/sync` support Bitwarden extended types such as **bank account**, **driver's license**, and **passport**, in addition to login, card, identity, secure note, and SSH key flows. Icons and import/export paths treat them like other ciphers with EncString validation.
+
 ## Unknown field passthrough
 
 Cipher save preserves unknown fields, and responses pass them through. If clients add fields that do not conflict with server-controlled fields, NodeWarden should not eat them.

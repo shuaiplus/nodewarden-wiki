@@ -67,6 +67,10 @@ File upload and download also use independent short tokens signed by `JWT_SECRET
 
 Current public access supports no extra authentication and password authentication. Email authentication fields can be stored for compatibility, but public access returns unsupported and does not send email verification codes.
 
+## Password-protected Send (Web Vault)
+
+In the Web Vault, Sends with a password show a **lock indicator** in the list. When editing an existing protected Send, the password field shows **masked dots** instead of exposing the secret. A compact control removes the stored password without leaving the form. The server still only stores password hash material; plaintext never leaves the client encryption flow.
+
 Main public paths:
 
 ```text

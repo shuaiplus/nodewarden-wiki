@@ -58,11 +58,15 @@
 
 | 自动化 | 触发方式 | 会改什么 | 不应该改什么 |
 | --- | --- | --- | --- |
-| `Sync upstream` | 每日计划或手动输入 commit/tag | 同步 fork 的 `main` 到上游 release 或指定提交。手动模式可能 force push。 | 不应该让上游覆盖 `.github/workflows/sync-upstream.yml`。 |
-| `Sync Bitwarden global domains` | 每周计划或手动输入 `bitwarden_ref` | `src/static/global_domains.bitwarden.json`、`src/static/global_domains.bitwarden.meta.json`。 | `src/static/global_domains.custom.json`。 |
-| `Security Scan` | push、PR、手动 | 生成安全扫描报告和 artifacts。 | 不改业务代码。 |
-| `npm run build` | 本地或部署 | 生成 `dist/` 前端静态资源。 | 不代表 D1 schema 已在远端实例执行。 |
-| `cd wiki && npm run build` | 本地文档验证 | 生成 VitePress 构建产物。 | 不代表业务前端构建通过。 |
+| `CodeQL Advanced`（`codeql.yml`） | 任意分支 push | GitHub Security 中的 CodeQL 结果。 | 业务源码。 |
+| `Extra Security Scan`（`security-extra.yml`） | 任意分支 push | Gitleaks + OSV 报告/SARIF/artifacts。 | 业务源码。 |
+| `Sync Bitwarden global domains`（`sync-global-domains.yml`） | 每周一 cron 或手动 `bitwarden_ref` | 通过 PR 更新 `global_domains.bitwarden.json`、`.meta.json`。 | `global_domains.custom.json`。 |
+| `npm run domains:sync` | 本地或上述 Action | 与 Action 相同的 Bitwarden 域名生成 JSON。 | `global_domains.custom.json`。 |
+| `npm run deploy:kv` | 本地/CI 部署 | `scripts/ensure-kv.cjs` 后部署 `wrangler.kv.toml`。 | D1 用户数据。 |
+| `npm run build` | 本地或 Cloudflare 构建 | `dist/` 前端资源。 | 不代表远端已跑 D1 schema。 |
+| `cd nodewarden-wiki && npm run build` | 本地 wiki | VitePress 产物。 | 不代表主应用构建通过。 |
+
+Fork 用户用 **GitHub Sync fork** 更新代码；仓库内已无 upstream 自动同步 workflow。
 
 贡献者提交 PR 时要分清楚：生成文件由 Action 更新，项目自定义文件由人工 PR 更新，用户个人设置由 D1 保存。
 
@@ -73,7 +77,7 @@
 | 后端、共享类型、schema | `npx tsc -p tsconfig.json --noEmit`，`npm run build`。 |
 | 前端组件、路由、样式 | `npx tsc -p webapp/tsconfig.json --noEmit`，`npm run build`，至少检查桌面和移动端。 |
 | i18n | `npm run i18n:validate`，再 `npm run build`。 |
-| wiki | `cd wiki` 后运行 `npm run build`。 |
+| wiki | `cd nodewarden-wiki` 后运行 `npm run build`。 |
 | 备份恢复 | 本地导出、远程备份、hash 校验、fresh instance 和 replace existing 分支都要想清楚。 |
 | 官方客户端兼容 | 看 `/identity/connect/token`、`/api/sync`、附件/Send direct upload 响应 shape。 |
 

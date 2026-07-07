@@ -58,11 +58,15 @@ Runtime data does not enter backups by default. Refresh tokens, device sessions,
 
 | Automation | Trigger | Changes | Should not change |
 | --- | --- | --- | --- |
-| `Sync upstream` | Daily schedule or manual commit/tag | Syncs fork `main` to upstream release or target commit. Manual mode may force-push. | Should not let upstream overwrite `.github/workflows/sync-upstream.yml`. |
-| `Sync Bitwarden global domains` | Weekly schedule or manual `bitwarden_ref` | `src/static/global_domains.bitwarden.json`, `src/static/global_domains.bitwarden.meta.json`. | `src/static/global_domains.custom.json`. |
-| `Security Scan` | push, PR, manual | Generates scan reports and artifacts. | Does not edit business code. |
-| `npm run build` | Local or deployment | Generates `dist/` frontend assets. | Does not prove D1 schema has executed on a remote instance. |
-| `cd wiki && npm run build` | Local documentation verification | Generates VitePress output. | Does not prove the main app build passes. |
+| `CodeQL Advanced` (`codeql.yml`) | Push to any branch | Security analysis results in GitHub Security tab. | Business source files. |
+| `Extra Security Scan` (`security-extra.yml`) | Push to any branch | Gitleaks + OSV scan reports/SARIF/artifacts. | Business source files. |
+| `Sync Bitwarden global domains` (`sync-global-domains.yml`) | Monday cron or manual `bitwarden_ref` | `src/static/global_domains.bitwarden.json`, `src/static/global_domains.bitwarden.meta.json` via PR. | `src/static/global_domains.custom.json`. |
+| `npm run domains:sync` | Local or Action above | Same generated Bitwarden domain JSON as the Action. | `global_domains.custom.json`. |
+| `npm run deploy:kv` | Local/CI deploy | May create KV via `scripts/ensure-kv.cjs`, then deploy `wrangler.kv.toml`. | D1 user data. |
+| `npm run build` | Local or Cloudflare build | Generates `dist/` frontend assets. | Does not prove D1 schema ran on a remote instance. |
+| `cd nodewarden-wiki && npm run build` | Local wiki checkout | VitePress output. | Does not prove the main app build passes. |
+
+Fork owners update code with **GitHub Sync fork**, not an in-repo upstream Action (removed).
 
 Contributor PRs should distinguish generated files, project-owned files, and user data stored in D1.
 
@@ -73,7 +77,7 @@ Contributor PRs should distinguish generated files, project-owned files, and use
 | Backend, shared types, schema | `npx tsc -p tsconfig.json --noEmit`, `npm run build`. |
 | Frontend components, routes, styles | `npx tsc -p webapp/tsconfig.json --noEmit`, `npm run build`, and desktop/mobile inspection. |
 | i18n | `npm run i18n:validate`, then `npm run build`. |
-| wiki | Run `npm run build` inside `wiki`. |
+| wiki | Run `npm run build` inside `nodewarden-wiki` (or your wiki checkout directory). |
 | Backup restore | Think through local export, remote backup, hash verification, fresh instance, and replace-existing branches. |
 | Official-client compatibility | Check `/identity/connect/token`, `/api/sync`, and attachment/Send direct upload response shapes. |
 

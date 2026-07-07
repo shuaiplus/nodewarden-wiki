@@ -17,7 +17,7 @@ Do not append `/api` or `/identity`. The client appends protocol paths itself.
 Official clients usually call:
 
 1. `/identity/accounts/prelogin`: fetch KDF parameters.
-2. `/identity/connect/token`: log in with the master password hash.
+2. `/identity/connect/token`: log in with the master password hash (or passkey / API key / remembered 2FA).
 3. `/api/sync`: sync profile, folders, ciphers, domains, sends, and related data.
 
 NodeWarden returns fields required by current clients, including `email_verified`, `amr`, `premium`, `UserDecryptionOptions`, and `userDecryption`.
@@ -33,13 +33,17 @@ The approximate server path is:
 After a successful password login, the server:
 
 1. Verifies the submitted master password hash.
-2. Returns a client-compatible 2FA challenge if TOTP is enabled.
-3. Records or updates device information.
+2. Returns a client-compatible 2FA challenge if two-step login is enabled (TOTP, YubiKey OTP, passkey 2FA, etc.).
+3. Records or updates device information (including registration routes used by newer clients).
 4. Signs an access token.
 5. Generates a refresh token, then either returns it to the client or stores it in an HttpOnly cookie for the Web Vault.
 6. Returns the user key, private key, KDF parameters, and decryption options.
 
 The main difference between the Web Vault and official clients is refresh-token storage. Web login sends `X-NodeWarden-Web-Session: 1`, so the server stores the refresh token in the `nodewarden_web_refresh` HttpOnly cookie. Official clients still receive and store refresh tokens according to the Bitwarden protocol.
+
+## Passkey login
+
+Account-level passkey login uses WebAuthn/FIDO2. See [Passkey Login](/guide/security/passkey-login). Passkeys can satisfy 2FA when configured as a second factor.
 
 ## API key login
 
@@ -49,26 +53,19 @@ Client credentials mode uses:
 - `client_secret = API Key`
 - `scope = api`
 
-The API key can be created or rotated in the Web Vault account security area. Rotating it updates `securityStamp` and clears the user's refresh tokens so old sessions are invalidated.
+The API key can be created or rotated in the Web Vault account security area. The server stores API key material as a **hash**. Rotating updates `securityStamp` and clears the user's refresh tokens so old sessions are invalidated.
 
-API key login authenticates the client, but it does not unlock the vault. The client still needs local key material or a key derived from the master password to decrypt vault data. When maintaining API key behavior, check:
+API key login authenticates the client, but it does not unlock the vault. The client still needs local key material or a key derived from the master password to decrypt vault data.
 
-- `src/handlers/accounts.ts`: view or rotate API key.
-- `src/handlers/identity.ts`: `client_credentials` grant.
-- `src/services/auth.ts`: access and refresh tokens.
-- `webapp/src/hooks/useAccountSecurityActions.ts`: Web Vault actions and messages.
+## Two-step login
 
-## 2FA
+NodeWarden supports user-level **TOTP**, **YubiKey OTP**, **passkey 2FA**, remembered devices, and recovery codes. See [Two-Step Login and Devices](/guide/security/two-factor-devices).
 
-NodeWarden currently supports user-level TOTP:
+Organization-level email 2FA, SSO, and the full Bitwarden enterprise provider set are not implemented. Server routes that imply unsupported email verification or server-driven KDF enrollment return explicit unsupported responses.
 
-- If TOTP is enabled, login returns a 2FA challenge official clients can understand.
-- Remembered device tokens are supported.
-- Recovery codes can disable TOTP and are rotated after use.
+## Login requests and fill-assist
 
-Organization-level, email, WebAuthn, and the full Bitwarden 2FA provider set are not currently supported.
-
-Using a recovery code to disable TOTP updates `securityStamp`, clears refresh tokens, and rotates a new recovery code. A remembered-device token is bound to a device identifier; it is not a global 2FA bypass token.
+Passwordless approval and cross-device unlock use auth requests. Clients may call `POST /fill-assist` for credential assist. See [Login Requests and Fill-Assist](/guide/core/login-requests).
 
 ## Devices and sessions
 
@@ -78,17 +75,9 @@ When a token is later verified, the server checks whether the device record exis
 
 - Deleting a device invalidates old access tokens from that device.
 - Updating a device session stamp can force one device to log in again.
-- Clearing refresh tokens breaks old refresh flows, while existing access tokens still need `securityStamp` or device stamp checks.
 
-## Compatibility boundary
+Manage devices in the Web Vault under **Settings → Security**.
 
-NodeWarden does not currently implement organizations, collections, member permissions, or enterprise policies. `collections` and `policies` in sync responses stay as empty structures so personal vault client flows can continue.
+## Cipher types and TOTP
 
-If an official client can sync but fails to open the vault after an update, check:
-
-- The shape of cipher fields in `/api/sync`.
-- Whether `EncString` values are valid.
-- Whether `UserDecryptionOptions` is complete.
-- Whether SSH key, FIDO2, or attachment fields gained new client expectations.
-
-Do not debug compatibility only by HTTP status. Many official clients receive a 200 from `/api/sync` and then fail locally because a response field shape is wrong. Save the failing sync response and compare it against `cipherToResponse()` in `src/handlers/ciphers.ts` and the filtering logic in `src/handlers/sync.ts`.
+Sync includes extended cipher types (bank account, driver's license, passport, SSH, etc.) when present. Login TOTP fields follow Bitwarden EncString rules; `steam://` URIs are supported for authenticator entries.

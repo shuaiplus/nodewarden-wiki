@@ -2,6 +2,8 @@
 
 NodeWarden updates focus on keeping code, the D1 schema, frontend assets, and `JWT_SECRET` stable.
 
+User-visible changes by version are documented in [`RELEASE_NOTES.md`](https://github.com/shuaiplus/NodeWarden/blob/main/RELEASE_NOTES.md) on GitHub only (not duplicated in this wiki).
+
 ## What fork users should do
 
 If you forked the repository, click this on GitHub:
@@ -19,39 +21,28 @@ Users usually do not need to run SQL manually. The real checks are:
 - Deployment logs do not show D1 initialization failures.
 - A verifiable backup exists before a major update.
 
-## Automatic upstream sync
+## GitHub Actions in the repository
 
-The repository includes a GitHub Actions workflow for syncing upstream. You can enable it in your fork:
+The main NodeWarden repo ships **three** workflows under `.github/workflows/`. None of them replace **Sync fork → Update branch** on GitHub; that is still how most fork owners pull new releases.
 
-```text
-Actions -> Sync upstream -> Enable workflow
+| Workflow file | Name in Actions UI | Trigger | What it does |
+| --- | --- | --- | --- |
+| `codeql.yml` | CodeQL Advanced | Push to any branch | GitHub CodeQL for Actions + JavaScript/TypeScript (`security-extended`, `security-and-quality`). |
+| `security-extra.yml` | Extra Security Scan | Push to any branch | Gitleaks secret scan (summary + artifact) and OSV dependency scan (SARIF upload, fails on reported vulns). |
+| `sync-global-domains.yml` | Sync Bitwarden global domains | Weekly cron (Mondays) or manual | Runs `npm run domains:sync`, updates only `global_domains.bitwarden.json` + `.meta.json`, verifies `global_domains.custom.json` unchanged, opens a PR. Manual run accepts optional `bitwarden_ref` (validated before sync). |
+
+Older docs mentioned **Sync upstream** (`sync-upstream.yml`). That workflow is **not** in the current tree. Fork maintainers sync from [shuaiplus/NodeWarden](https://github.com/shuaiplus/NodeWarden) with GitHub’s fork sync or their own git workflow.
+
+### Global domain rule sync (maintainers)
+
+See [Domain Rules](/guide/core/domain-rules). Local equivalent:
+
+```powershell
+npm run domains:sync
+npm run domains:sync -- --ref main
 ```
 
-After it is enabled, the workflow runs on its configured schedule.
-
-`.github/workflows/sync-upstream.yml` has two modes:
-
-| Mode | Trigger | Behavior |
-| --- | --- | --- |
-| Scheduled | Daily cron | Reads the latest upstream release tag and merges it into `main` if the fork does not already contain that commit. |
-| Manual | Actions page | If `target_commit` is provided, checks out that commit or tag. If it is empty, uses the latest `upstream/main`. |
-
-Manual mode can upgrade or roll back, so the workflow force-pushes `main`. Use it only when you know the target commit.
-
-After sync, the workflow restores its own `.github/workflows/sync-upstream.yml` so it is not overwritten by upstream. It does not update user D1 data and does not generate backups.
-
-## Global domain rule sync
-
-Global equivalent domain rules have a separate Action: `.github/workflows/sync-global-domains.yml`.
-
-It updates only:
-
-- `src/static/global_domains.bitwarden.json`
-- `src/static/global_domains.bitwarden.meta.json`
-
-It also checks that `src/static/global_domains.custom.json` did not change. NodeWarden-specific global rules should be added by a manual PR to `global_domains.custom.json`, not mixed into generated Bitwarden sync output.
-
-See [Domain Rules](/guide/core/domain-rules) for details.
+`deploy:kv` runs `node scripts/ensure-kv.cjs` before `wrangler deploy` so the KV namespace binding exists.
 
 ## Updates do not require manual migrations
 

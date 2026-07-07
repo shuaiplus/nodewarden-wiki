@@ -78,6 +78,14 @@ ImportPage.tsx
 
 If attachment upload fails, ciphers may already have been imported while the attachment bodies are incomplete. Import UX should show partial success clearly instead of only saying “import completed”.
 
+## Bitwarden CSV (v1.7.2+)
+
+The CSV parser recognizes **custom fields** and restores their metadata on import. **Multiline values** (for example SSH private keys split across lines) are preserved; earlier versions could truncate lines without a `: ` delimiter to the first line only.
+
+## Encrypted-field validation (v1.7.3+)
+
+Imports validate payload structure and ZIP entries before processing. Plaintext **FIDO2 credential**, **SSH key**, and **password history** fields that must be EncString-shaped are **rejected** with a clear error instead of being accepted and dropped later during sync.
+
 ## Difference from instance backup
 
 Vault import and export is for user vault migration. It does not include administrator config, backup targets, user status, schema status, or other instance-level data.

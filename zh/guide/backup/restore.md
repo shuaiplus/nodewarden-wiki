@@ -21,6 +21,10 @@ nodewarden_backup_20260510_031500_abc12.zip
 
 管理员可以选择允许 hash 不匹配，但这会被写入审计日志里的 `checksumMismatchAccepted`。
 
+## 导入锁（v1.7.2+）
+
+完整实例恢复会获取**独占导入锁**，避免两名管理员同时应用冲突的恢复。若锁已被占用，API 会返回正在恢复中的错误说明。
+
 ## 解析 ZIP
 
 `parseBackupArchive()` 会检查：

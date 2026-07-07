@@ -2,6 +2,8 @@
 
 Website icons are visual aids for the Web Vault list. They do not participate in domain matching, vault decryption, or security decisions.
 
+Icons are **always enabled** for NodeWarden deployments. The older `WEBSITE_ICONS_ENABLED` environment toggle was removed; you do not need to set it in Workers variables.
+
 ## What users see
 
 The Web Vault takes the hostname from a cipher's first login URI and tries to load:

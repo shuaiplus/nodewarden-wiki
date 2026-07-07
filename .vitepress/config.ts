@@ -31,6 +31,7 @@ const englishSidebar: DefaultTheme.Sidebar = {
         { text: 'Cloudflare Deployment', link: '/guide/deployment/cloudflare' },
         { text: 'Configuration and Secrets', link: '/guide/deployment/configuration' },
         { text: 'Client Connections', link: '/guide/core/clients' },
+        { text: 'Login Requests', link: '/guide/core/login-requests' },
         { text: 'FAQ', link: '/guide/operations/faq' },
         { text: 'Troubleshooting', link: '/guide/operations/troubleshooting' }
       ]
@@ -98,6 +99,7 @@ const chineseSidebar: DefaultTheme.Sidebar = {
         { text: 'Cloudflare 参数', link: '/zh/guide/deployment/cloudflare' },
         { text: '配置与密钥', link: '/zh/guide/deployment/configuration' },
         { text: '客户端连接', link: '/zh/guide/core/clients' },
+        { text: '登录请求', link: '/zh/guide/core/login-requests' },
         { text: '常见问题', link: '/zh/guide/operations/faq' },
         { text: '排错清单', link: '/zh/guide/operations/troubleshooting' }
       ]
@@ -192,7 +194,8 @@ const descriptions: Record<string, string> = {
   'guide/operations/faq.md': 'Short answers to common NodeWarden questions about JWT_SECRET, master password recovery, Send backups, remote attachment storage, SQL migrations, and project support.',
   'guide/operations/limitations.md': 'Known NodeWarden boundaries around Cloudflare platform limits, unsupported Bitwarden Enterprise features, partial features, and security assumptions.',
   'guide/operations/troubleshooting.md': 'Troubleshooting checks for NodeWarden deployment errors, registration failures, client login, sync issues, attachments, remote backups, and restores.',
-  'guide/operations/backup-incidents.md': 'How to respond to damaged remote backups, backup setting repair prompts, partial attachment restores, deleted remote attachments, and changed JWT_SECRET.'
+  'guide/operations/backup-incidents.md': 'How to respond to damaged remote backups, backup setting repair prompts, partial attachment restores, deleted remote attachments, and changed JWT_SECRET.',
+  'guide/core/login-requests.md': 'Bitwarden-compatible login requests, cross-device approval, fill-assist, device registration, and push relay compatibility in NodeWarden.'
 };
 
 const zhDescriptions: Record<string, string> = {
@@ -233,7 +236,8 @@ const zhDescriptions: Record<string, string> = {
   'zh/guide/operations/faq.md': 'NodeWarden 常见问题，涵盖 JWT_SECRET、主密码恢复、Send 备份、附件存储、SQL 迁移和项目反馈。',
   'zh/guide/operations/limitations.md': 'NodeWarden 的 Cloudflare 平台边界、未实现的 Bitwarden Enterprise 能力、部分支持能力和安全边界。',
   'zh/guide/operations/troubleshooting.md': 'NodeWarden 部署、注册、客户端登录、同步、附件、远程备份和还原的排错清单。',
-  'zh/guide/operations/backup-incidents.md': 'NodeWarden 远程备份损坏、备份设置修复、附件部分恢复、误删附件目录和误换 JWT_SECRET 的处理方式。'
+  'zh/guide/operations/backup-incidents.md': 'NodeWarden 远程备份损坏、备份设置修复、附件部分恢复、误删附件目录和误换 JWT_SECRET 的处理方式。',
+  'zh/guide/core/login-requests.md': 'NodeWarden 登录请求、跨设备批准、fill-assist、设备注册与推送中继兼容说明。'
 };
 
 function pageUrl(relativePath: string): string {

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: NodeWarden
   text: Cloudflare 上的轻量 Bitwarden 兼容服务端
-  tagline: 自带网页密码库、附件、Send、导入导出、云端备份中心与官方客户端兼容能力。
+  tagline: v1.7.3 — 网页密码库、登录请求、两步验证（TOTP/YubiKey/通行密钥）、附件、Send、备份与 Cloudflare Workers 上的官方客户端兼容。
   image:
     src: /nodewarden-logo.svg
     alt: NodeWarden

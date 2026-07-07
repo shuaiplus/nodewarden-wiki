@@ -24,7 +24,7 @@ NodeWarden does not currently implement:
 - Directory sync
 - Organization event logs
 - Enterprise administrator password reset
-- Email-sent verification, invitation, or password hint flows
+- Email-sent verification, invitation, or password hint flows (related API routes may return explicit **unsupported** responses)
 
 Some related APIs return empty lists so personal vault flows can continue. That does not mean the feature is available.
 
@@ -32,12 +32,16 @@ Some related APIs return empty lists so personal vault flows can continue. That 
 
 | Feature | Current boundary |
 | --- | --- |
-| Login 2FA | Supports user-level TOTP, remembered devices, and recovery codes; does not cover every official 2FA provider. |
-| Notifications | Provides a Durable Object notification center, but clients should still treat `/api/sync` as the final consistency source. |
-| API key login | Supports personal API key `client_credentials` login. API key authenticates the client but does not replace the master password for vault unlock. |
-| Passkey / FIDO2 fields | Preserves and displays compatible FIDO2 fields in ciphers; this is not full account-level WebAuthn login. |
-| Website icons | Proxies two upstream icon sources and may timeout, miss, or fall back to local icons. See [Website Icons](/guide/core/website-icons). |
-| Remote backup | Supports WebDAV and S3-compatible storage; reliability still depends on the provider's WebDAV/S3 behavior. |
+| Login 2FA | User-level **TOTP**, **YubiKey OTP**, **passkey 2FA**, remembered devices, and recovery codes. Not every official enterprise 2FA provider. |
+| Passkey login | Full account-level WebAuthn/FIDO2 login and optional vault unlock (PRF). See [Passkey Login](/guide/security/passkey-login). |
+| Login requests | Approve/deny passwordless and cross-device flows; see [Login Requests](/guide/core/login-requests). Not full Bitwarden organization admin auth. |
+| Notifications | Durable Object notification center; clients should still treat `/api/sync` as the final consistency source. |
+| API key login | Personal API key `client_credentials` login; secrets stored as hashes server-side. API key authenticates the client but does not replace the master password for vault unlock. |
+| Extended cipher types | Bank account, driver's license, passport, SSH key, FIDO2 fields in ciphers; EncString validation applies. |
+| Cipher TOTP | Bitwarden-aligned TOTP storage and `steam://` URIs in login URIs. |
+| Website icons | Always enabled; proxies upstream sources with privacy limits. See [Website Icons](/guide/core/website-icons). No `WEBSITE_ICONS_ENABLED` env toggle. |
+| Remote backup | WebDAV and S3-compatible storage (R2, B2, Tigris presets); reliability depends on the provider. Import lock and ZIP checksum on full restore. |
+| Fill-assist | `POST /fill-assist` for client autofill assist; does not bypass vault unlock. |
 
 ## Security boundaries
 
