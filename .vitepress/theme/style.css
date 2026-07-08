@@ -247,21 +247,15 @@ body:has(.VPHome) .VPNavBarSearch {
 }
 
 .nw-sponsor-grid {
-  display: grid;
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-  gap: 24px;
-  align-items: start;
+  display: flex;
+  justify-content: center;
   margin: 18px 0 28px;
 }
 
-.nw-sponsor-qr,
-.nw-sponsor-note {
+.nw-sponsor-qr {
   border: 1px solid var(--nw-line);
   border-radius: 8px;
   background: color-mix(in srgb, var(--vp-c-bg-soft) 76%, var(--vp-c-bg));
-}
-
-.nw-sponsor-qr {
   padding: 18px;
   text-align: center;
 }
@@ -278,35 +272,11 @@ body:has(.VPHome) .VPNavBarSearch {
   font-size: 14px;
 }
 
-.nw-sponsor-note {
-  padding: 20px 22px;
-}
-
-.nw-sponsor-note h2 {
-  margin: 0 0 12px;
-  border-top: 0;
-  padding-top: 0;
-  color: var(--nw-ink);
-  font-size: 20px;
-  letter-spacing: 0;
-}
-
-.nw-sponsor-note ul {
-  margin: 0;
-  padding-left: 20px;
-}
-
-.nw-sponsor-note li {
-  margin: 8px 0;
-  color: var(--nw-muted);
-}
-
 @media (max-width: 900px) {
   .nw-snapshot,
   .nw-metrics,
   .nw-grid,
-  .nw-steps,
-  .nw-sponsor-grid {
+  .nw-steps {
     grid-template-columns: 1fr;
   }
 
