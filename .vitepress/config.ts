@@ -9,6 +9,7 @@ const englishNav: DefaultTheme.NavItem[] = [
   { text: 'Deploy', link: '/guide/deployment/cloudflare' },
   { text: 'Backup & Restore', link: '/guide/operate' },
   { text: 'Troubleshooting', link: '/guide/operations/troubleshooting' },
+  { text: 'Support', link: '/sponsor' },
   { text: 'Contributors', link: '/guide/contribute' },
   { text: 'Wiki repo', link: WIKI_REPO },
   { text: 'Demo', link: 'https://demo.nodewarden.app/' }
@@ -19,6 +20,7 @@ const chineseNav: DefaultTheme.NavItem[] = [
   { text: '部署', link: '/zh/guide/deployment/cloudflare' },
   { text: '备份与恢复', link: '/zh/guide/operate' },
   { text: '排错', link: '/zh/guide/operations/troubleshooting' },
+  { text: '赞助', link: '/zh/sponsor' },
   { text: '贡献者', link: '/zh/guide/contribute' },
   { text: 'Wiki 仓库', link: WIKI_REPO },
   { text: 'Demo', link: 'https://demo.nodewarden.app/' }
@@ -162,6 +164,7 @@ const chineseSidebar: DefaultTheme.Sidebar = {
 
 const descriptions: Record<string, string> = {
   'index.md': 'NodeWarden documentation for deploying, operating, backing up, and developing a Bitwarden-compatible server running on Cloudflare Workers.',
+  'sponsor.md': 'Support NodeWarden development and maintenance with WeChat or cryptocurrency sponsorship.',
   'guide/start.md': 'A beginner-friendly reading path for deploying NodeWarden, connecting Bitwarden clients, and finding the right troubleshooting pages without reading contributor docs first.',
   'guide/operate.md': 'A focused operations path for maintaining a deployed NodeWarden instance, including updates, backups, restores, incidents, and platform limits.',
   'guide/contribute.md': 'A contributor reading path for understanding NodeWarden architecture, storage, compatibility, APIs, frontend code, and safe development conventions.',
@@ -204,6 +207,7 @@ const descriptions: Record<string, string> = {
 
 const zhDescriptions: Record<string, string> = {
   'zh/index.md': 'NodeWarden 中文文档，介绍 Cloudflare Workers 上的 Bitwarden 兼容服务端部署、备份、安全、架构和维护方式。',
+  'zh/sponsor.md': '通过微信或加密货币赞助 NodeWarden 的长期维护、兼容性跟进、安全修复和文档建设。',
   'zh/guide/start.md': 'NodeWarden 新手阅读路线，帮助用户完成部署、连接客户端，并快速找到排错文档，不需要先读贡献者内容。',
   'zh/guide/operate.md': 'NodeWarden 实例维护路线，覆盖更新、备份、恢复、备份事故和 Cloudflare 平台限制。',
   'zh/guide/contribute.md': 'NodeWarden 贡献者阅读路线，覆盖架构、存储、兼容性、API、前端和安全开发约定。',

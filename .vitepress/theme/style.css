@@ -246,11 +246,67 @@ body:has(.VPHome) .VPNavBarSearch {
   line-height: 1.7;
 }
 
+.nw-sponsor-grid {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+  margin: 18px 0 28px;
+}
+
+.nw-sponsor-qr,
+.nw-sponsor-note {
+  border: 1px solid var(--nw-line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 76%, var(--vp-c-bg));
+}
+
+.nw-sponsor-qr {
+  padding: 18px;
+  text-align: center;
+}
+
+.nw-sponsor-qr img {
+  width: 100%;
+  max-width: 260px;
+  border-radius: 8px;
+}
+
+.nw-sponsor-qr p {
+  margin: 12px 0 0;
+  color: var(--nw-muted);
+  font-size: 14px;
+}
+
+.nw-sponsor-note {
+  padding: 20px 22px;
+}
+
+.nw-sponsor-note h2 {
+  margin: 0 0 12px;
+  border-top: 0;
+  padding-top: 0;
+  color: var(--nw-ink);
+  font-size: 20px;
+  letter-spacing: 0;
+}
+
+.nw-sponsor-note ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.nw-sponsor-note li {
+  margin: 8px 0;
+  color: var(--nw-muted);
+}
+
 @media (max-width: 900px) {
   .nw-snapshot,
   .nw-metrics,
   .nw-grid,
-  .nw-steps {
+  .nw-steps,
+  .nw-sponsor-grid {
     grid-template-columns: 1fr;
   }
 
