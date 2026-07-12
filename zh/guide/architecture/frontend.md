@@ -64,7 +64,7 @@ NodeWarden 网页密码库是渐进式 Web 应用，具备离线能力：
 | 应用外壳 | `AppAuthenticatedShell.tsx`、`AppMainRoutes.tsx` |
 | 密码库 | `VaultPage.tsx`、`components/vault/*` |
 | Send | `SendsPage.tsx`、`PublicSendPage.tsx` |
-| 设置与安全 | `SettingsPage.tsx`、`SecurityDevicesPage.tsx` |
+| 设置与安全 | `SettingsPage.tsx`、`SecurityDevicesPage.tsx`、`PasswordSecurityPage.tsx`（路由 `/security/password-health`；见 [密码安全检查](../security/password-security)） |
 | 管理与备份 | `AdminPage.tsx`、`BackupCenterPage.tsx`、`components/backup-center/*` |
 | 其它工具 | `DomainRulesPage.tsx`、`ImportPage.tsx`、`NotFoundPage.tsx` |
 

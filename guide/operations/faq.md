@@ -30,6 +30,10 @@ Usually no. The Worker automatically runs idempotent schema initialization based
 
 During first registration, if the `users` table is empty, the server assigns the first user `admin` role and writes `registered=true`.
 
+## Does Password Security upload my passwords?
+
+No. The Web Vault checks **exposed** passwords with Have I Been Pwned’s **k-anonymity** range API: only the first five hex characters of a local SHA-1 leave the browser. Reuse and weak checks stay fully local. Nothing goes through the NodeWarden Worker for this feature. See [Password Security Check](/guide/security/password-security).
+
 ## Should I report NodeWarden issues to Bitwarden?
 
 No. NodeWarden is an independent project and is not affiliated with Bitwarden. Report NodeWarden issues in the NodeWarden project.

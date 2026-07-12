@@ -72,6 +72,7 @@ const englishSidebar: DefaultTheme.Sidebar = {
         { text: 'Passkey Login', link: '/guide/security/passkey-login' },
         { text: 'JWT and Sessions', link: '/guide/security/jwt-session' },
         { text: 'Two-Step Login and Devices', link: '/guide/security/two-factor-devices' },
+        { text: 'Password Security Check', link: '/guide/security/password-security' },
         { text: 'Permissions, Rate Limits, and Audit', link: '/guide/security/rate-limit-audit' }
       ]
     },
@@ -140,6 +141,7 @@ const chineseSidebar: DefaultTheme.Sidebar = {
         { text: 'Passkey 登录', link: '/zh/guide/security/passkey-login' },
         { text: 'JWT 与会话', link: '/zh/guide/security/jwt-session' },
         { text: '两步验证与设备', link: '/zh/guide/security/two-factor-devices' },
+        { text: '密码安全检查', link: '/zh/guide/security/password-security' },
         { text: '权限、限流与审计', link: '/zh/guide/security/rate-limit-audit' }
       ]
     },
@@ -189,6 +191,7 @@ const descriptions: Record<string, string> = {
   'guide/security/accounts.md': 'How NodeWarden handles accounts, master password hashes, vault keys, password changes, securityStamp, KDF settings, and password hints.',
   'guide/security/jwt-session.md': 'How NodeWarden uses JWT_SECRET, access tokens, refresh tokens, device binding, attachment tokens, Send tokens, and HMAC key caching.',
   'guide/security/two-factor-devices.md': 'How NodeWarden supports user-level TOTP, login challenges, remembered devices, recovery codes, and device records.',
+  'guide/security/password-security.md': 'How the Web Vault password security check detects exposed, reused, and weak login passwords using local SHA-1 and Have I Been Pwned k-anonymity, without uploading plaintext or full hashes.',
   'guide/security/rate-limit-audit.md': 'NodeWarden administrator permissions, rate limits, request size limits, and audit log coverage.',
   'guide/architecture/overview.md': 'A high-level map of NodeWarden as a single Cloudflare Worker application with frontend assets, APIs, D1, R2, KV, cron, and Durable Object notifications.',
   'guide/architecture/backend-routing-services.md': 'How NodeWarden backend requests flow through index, routers, handlers, services, storage, rate limits, and backup boundaries.',
@@ -232,6 +235,7 @@ const zhDescriptions: Record<string, string> = {
   'zh/guide/security/accounts.md': 'NodeWarden 账号、主密码 hash、vault key、密码变更、securityStamp、KDF 和密码提示安全边界。',
   'zh/guide/security/jwt-session.md': 'NodeWarden 的 JWT_SECRET、access token、refresh token、设备绑定、附件和 Send 短 token 设计。',
   'zh/guide/security/two-factor-devices.md': 'NodeWarden 用户级 TOTP、登录挑战、记住设备、恢复码和设备记录。',
+  'zh/guide/security/password-security.md': 'Web 保险库密码安全检查如何用本地 SHA-1 与 Have I Been Pwned k-匿名识别已泄露、重复使用和弱登录密码，且不上传明文或完整哈希。',
   'zh/guide/security/rate-limit-audit.md': 'NodeWarden 管理员权限、限流、请求体限制和审计日志覆盖范围。',
   'zh/guide/architecture/overview.md': 'NodeWarden 作为单 Worker 应用的整体架构，涵盖前端、API、D1、R2、KV、cron 和通知层。',
   'zh/guide/architecture/backend-routing-services.md': 'NodeWarden 后端请求如何经过 index、router、handler、service、存储、限流和备份边界。',

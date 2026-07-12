@@ -26,6 +26,7 @@ Vaultwarden is a mature Rust server designed for traditional servers, Docker, da
 | Login requests | Supported | Approve passwordless or cross-device login on another device. See [Login Requests](/guide/core/login-requests). |
 | `/api/sync` | Supported | Returns profile, folders, ciphers (including extended types), domains, sends, and decryption options expected by clients. |
 | Web Vault | Supported | Original UI; device management under Settings → Security; fullscreen toggle. |
+| Password security check | Supported | Web Vault only: manual exposed / reused / weak scan with HIBP k-anonymity. See [Password Security Check](/guide/security/password-security). |
 | TOTP (vault + 2FA) | Supported | User-level 2FA; cipher TOTP including `steam://`; QR upload in the Web Vault. |
 | Two-step providers | Supported | TOTP, YubiKey OTP, passkey 2FA, recovery codes, remembered devices. |
 | Attachments | Supported | R2 preferred, KV optional; KV objects limited by Cloudflare's 25 MiB object limit. |

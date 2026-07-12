@@ -64,7 +64,7 @@ Web Vault login uses `X-NodeWarden-Web-Session: 1`. The server puts the refresh 
 | App shell | `AppAuthenticatedShell.tsx`, `AppMainRoutes.tsx` |
 | Vault | `VaultPage.tsx`, `components/vault/*` |
 | Send | `SendsPage.tsx`, `PublicSendPage.tsx` |
-| Settings and security | `SettingsPage.tsx`, `SecurityDevicesPage.tsx` |
+| Settings and security | `SettingsPage.tsx`, `SecurityDevicesPage.tsx`, `PasswordSecurityPage.tsx` (route `/security/password-health`; see [Password Security Check](../security/password-security)) |
 | Administration and backup | `AdminPage.tsx`, `BackupCenterPage.tsx`, `components/backup-center/*` |
 | Other tools | `DomainRulesPage.tsx`, `ImportPage.tsx`, `NotFoundPage.tsx` |
 

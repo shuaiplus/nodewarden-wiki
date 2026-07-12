@@ -30,6 +30,10 @@ Cloudflare KV 单对象有大小限制。NodeWarden 在 KV 模式下会把附件
 
 首次注册时，如果 `users` 表为空，服务端会把第一个用户设为 admin，并写入 `registered=true`。
 
+## 密码安全检查会上传我的密码吗？
+
+不会。Web 保险库用 Have I Been Pwned 的 **k-匿名** range API 检查「已泄露」：浏览器本地算 SHA-1 后，**只发送前 5 位十六进制**。「重复使用」和「弱密码」完全本地完成。该功能不经过 NodeWarden Worker。详见 [密码安全检查](/zh/guide/security/password-security)。
+
 ## 可以向 Bitwarden 官方反馈 NodeWarden 的问题吗
 
 不要。NodeWarden 是独立项目，和 Bitwarden 官方无关。产品问题请在 [NodeWarden Issues](https://github.com/shuaiplus/NodeWarden/issues) 反馈。
