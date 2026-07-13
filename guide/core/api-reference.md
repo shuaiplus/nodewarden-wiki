@@ -26,7 +26,7 @@ Public APIs do not require a Bearer token, but sensitive paths still use rate li
 | Method | Path | Purpose |
 | --- | --- | --- |
 | `GET`, `PUT` | `/api/accounts/profile` | Get or update profile. |
-| `POST`, `PUT` | `/api/accounts/password`, `/api/accounts/change-password` | Change master password and refresh `securityStamp`. |
+| `POST`, `PUT` | `/api/accounts/password`, `/api/accounts/change-password` | Atomically update the password authentication hash and wrapped user key, then refresh `securityStamp`; accepts complete modern or legacy Bitwarden payloads. |
 | `POST` | `/api/accounts/keys` | Save account key material. |
 | `GET`, `PUT`, `POST` | `/api/accounts/totp` | Get or change user-level TOTP status. |
 | `POST` | `/api/accounts/totp/recovery-code`, `/api/two-factor/get-recover` | Get or rotate TOTP recovery code. |
