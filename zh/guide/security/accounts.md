@@ -29,14 +29,27 @@ serverHash = PBKDF2-SHA256(clientHash, email, 100000)
 
 如果忘记主密码，仅仅修改 D1 里的 `master_password_hash`，最多只能骗过服务端登录检查，无法解开已有 vault key，也就无法解密密码库。
 
-正确的密码变更流程必须同时更新：
+正确的密码变更流程必须把认证凭据和密码库 key 的包装结果一起更新：
 
-- 新的 server-side master password hash
-- 重新加密后的用户 key
-- 重新加密后的私钥
-- 可选 KDF 参数
-- `securityStamp`
-- refresh token 清理
+- 保存新的服务端主密码认证 hash。
+- 使用新主密码派生出的密钥，重新包装原有的用户 key。
+- 轮换 `securityStamp`。
+- 撤销已有 refresh token。
+
+普通改密不会轮换用户 key，也不会重新加密密码项或私钥，并且不会修改 KDF 参数。用户 key 轮换和 KDF 修改是另外的加密操作。
+
+## 改密请求兼容
+
+在 Bitwarden 上游协议过渡期间，NodeWarden 同时接受两种完整的改密请求：
+
+- 新格式：必须同时提供 `authenticationData` 和 `unlockData`。两者的 KDF 参数和 salt 必须相互一致，并与账号当前配置一致；必须包含 `unlockData.masterKeyWrappedUserKey`。
+- 旧格式：必须同时提供 `newMasterPasswordHash` 和 `key`。
+
+NodeWarden 自带 Web Vault 只发送新格式。服务端继续保留旧格式，用于兼容较旧的 Bitwarden 桌面端、浏览器扩展、移动端和 CLI。
+
+如果请求会产生不完整或互相矛盾的加密状态，服务端会在写入用户记录前直接拒绝。尤其不能只更新认证 hash 而不替换主密钥包装后的用户 key，否则新密码虽然能通过登录验证，却无法解锁密码库。
+
+请求格式只是客户端协议细节，不是账号的存储版本。现有账号不需要迁移，使用旧客户端改过密码也不会让账号永久变成“旧格式账号”。
 
 这由 `src/handlers/accounts.ts` 的密码变更接口处理。
 

@@ -29,7 +29,9 @@ Refresh tokens are random 32-byte base64url strings. The database does not store
 sha256:<digest>
 ```
 
-When a token is refreshed, the old refresh token is shortened into a small overlap window. This absorbs races where a browser extension popup and background process refresh at the same time.
+Refresh tokens follow the Bitwarden-compatible reusable model. A successful refresh returns the same opaque refresh token, issues a new short-lived access token, and extends the session's sliding idle expiry without a destructive token handoff. Web, browser, desktop, and CLI sessions use a 30-day sliding idle window; mobile sessions use 90 days. New sessions have a one-year absolute lifetime.
+
+Only confirmed permanent conditions return `invalid_grant`, such as an expired or revoked session, an inactive user, a changed user security stamp, or an explicitly revoked device. Rate limits and temporary storage or Worker failures return retryable errors and do not invalidate the session.
 
 When the Web Vault logs in with `X-NodeWarden-Web-Session: 1`, the refresh token is stored in the `nodewarden_web_refresh` HttpOnly cookie. Web local storage should not contain plaintext refresh tokens. Official clients and browser extensions still store and submit refresh tokens according to their own protocol.
 
@@ -40,7 +42,7 @@ If a client submits a device identifier, the server creates or updates a device 
 - `did`
 - `dstamp`
 
-During token verification, the server checks whether the device exists and whether the token's device session stamp matches the current device record.
+During token verification, the server checks whether the device exists and whether the token's device session stamp matches the current device record. Historical sessions without a device binding remain user-security-stamp-bound until they naturally expire; a missing or explicitly mismatched device is never recreated automatically.
 
 This means deleting a device or changing its session stamp can invalidate that device's old tokens.
 

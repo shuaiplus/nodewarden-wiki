@@ -26,7 +26,7 @@
 | 方法 | 路径 | 用途 |
 | --- | --- | --- |
 | `GET`, `PUT` | `/api/accounts/profile` | 获取或更新个人资料。 |
-| `POST`, `PUT` | `/api/accounts/password`, `/api/accounts/change-password` | 修改主密码并刷新 `securityStamp`。 |
+| `POST`, `PUT` | `/api/accounts/password`, `/api/accounts/change-password` | 原子更新密码认证 hash 与包装后的用户 key，再刷新 `securityStamp`；兼容完整的新旧 Bitwarden 请求。 |
 | `POST` | `/api/accounts/keys` | 保存账号密钥材料。 |
 | `GET`, `PUT`, `POST` | `/api/accounts/totp` | 获取或修改用户级 TOTP 状态。 |
 | `POST` | `/api/accounts/totp/recovery-code`, `/api/two-factor/get-recover` | 获取或轮换 TOTP 恢复码。 |

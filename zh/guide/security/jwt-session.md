@@ -29,7 +29,9 @@ refresh token 是随机 32 字节生成的 base64url 字符串。数据库里不
 sha256:<digest>
 ```
 
-刷新 token 时，旧 refresh token 会被缩短到一个短重叠窗口，用来吸收浏览器扩展 popup/background 同时刷新的竞态。
+refresh token 采用兼容 Bitwarden 的可复用模型。正常刷新会返回同一个随机 refresh token、签发新的短期 access token，并延长会话的滑动空闲期限，不再进行破坏性的 token 交接。网页、浏览器扩展、桌面和 CLI 的空闲期限为 30 天，移动端为 90 天；新会话的绝对最长寿命为一年。
+
+只有确认永久失效时才返回 `invalid_grant`，例如会话到期或被撤销、用户停用、用户 security stamp 改变、设备被明确撤销。限流、D1 或 Worker 临时故障只返回可重试错误，不会废掉登录会话。
 
 网页端使用 `X-NodeWarden-Web-Session: 1` 登录后，refresh token 会写入 `nodewarden_web_refresh` HttpOnly cookie。网页本地存储不应该保存 refresh token 明文；官方客户端和浏览器扩展仍按自身协议保存并提交 refresh token。
 
@@ -40,7 +42,7 @@ sha256:<digest>
 - `did`
 - `dstamp`
 
-写入 access token。验证 token 时会检查设备是否存在，以及 token 里的 device session stamp 是否等于当前设备记录。
+写入 access token。验证 token 时会检查设备是否存在，以及 token 里的 device session stamp 是否等于当前设备记录。历史上没有设备绑定的会话继续受用户 security stamp 约束并自然淘汰；设备缺失或明确 mismatch 时不会自动重建设备。
 
 这意味着删除设备或更新设备 session stamp，可以让该设备旧 token 失效。
 
